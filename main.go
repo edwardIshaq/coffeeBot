@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -18,6 +19,16 @@ https://goplatform.ngrok.io/
 add to slack button:	https://goplatform.ngrok.io/addToSlack
 OAuth handlers:			https://goplatform.ngrok.io/oauthRedirect
 outgoing hook url: 		https://goplatform.ngrok.io/outgoingHooks
+
+Notes:
+------------------------------------------
+Permissions update:
+	When ever the permissions are changed on the App's scopes
+	the button details (found in `func buttonTemplate()``) should be updated from https://api.slack.com/apps/AABQEB4M7/distribute?
+
+TODO:
+------------------------------------------
+[] save tokens to DB
 
 */
 
@@ -75,7 +86,6 @@ func sayHello(w http.ResponseWriter, r *http.Request) {
 }
 
 func buttonTemplate() string {
-
 	button := `
 	<body>
 		Add this to Slack <br>
@@ -102,10 +112,16 @@ func installWTAApplication(w http.ResponseWriter, r *http.Request) {
 // code=75950428352.351913834208.ab4422d8cec8e7b134b8dbe7659e097cecb294122cfebee8456cad92f03d1732&state=
 func oAuthRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
-	maybeCode, _ := exchangeCodeToAuth(code)
-	message := "didnt work"
-	if len(maybeCode) > 9 {
-		message = fmt.Sprintf("worked last digits: %s", maybeCode[:10])
+	//use `code` to get `OAuthResponse` response back
+	oauthResponse, err := slack.GetOAuthResponseContext(context.Background(), slackClientID, slackClientSecret, code, redirectURL(), false)
+
+	message := "Something wrong happened"
+	if err == nil {
+		message = ""
+		message += fmt.Sprintf("\nError?: %v", err)
+		message += fmt.Sprintf("\nBot token: %v", oauthResponse.Bot)
+		message += fmt.Sprintf("\naccessToken: %v", oauthResponse.AccessToken)
+		message += fmt.Sprintf("\nscopes: %v", oauthResponse.Scope)
 	}
 	w.Write([]byte(message))
 }
@@ -114,12 +130,7 @@ func redirectURL() string {
 	return "https://" + appURL + "/oauthRedirect"
 }
 
-func exchangeCodeToAuth(code string) (string, error) {
-	accessToken, scope, err := slack.GetOAuthToken(slackClientID, slackClientSecret, code, redirectURL(), false)
-	fmt.Printf("accessToken: %s, scope: %s err: %s", accessToken, scope, err)
-	return accessToken, err
-}
-
+//------------------------------------------
 //Slack outgoing hooks demo
 func handleOutgoingHooks(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("new outgoingWebhook from Slack")
