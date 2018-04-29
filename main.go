@@ -1,15 +1,5 @@
 package main
 
-import (
-	"context"
-	"fmt"
-	"net/http"
-	"strconv"
-	"strings"
-
-	"github.com/nlopes/slack"
-)
-
 /*
 This will support a basic play grounds for the `utaApp` found at the link below.string
 utaApp https://api.slack.com/apps/AABQEB4M7
@@ -29,11 +19,21 @@ Permissions update:
 TODO:
 ------------------------------------------
 [] save tokens to DB
-
 */
 
+import (
+	"context"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/nlopes/slack"
+)
+
 const (
-	utaAppToken = "xoxp-75950428352-75957863573-352376775186-cd1dd2d44890733760faaa6eda878916"
+	utaAppToken = "xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"
 	appURL      = "goplatform.ngrok.io"
 
 	slackClientID     = "75950428352.351830378721"
@@ -49,6 +49,7 @@ func main() {
 	http.HandleFunc("/addToSlack", installWTAApplication)
 	http.HandleFunc("/oauthRedirect", oAuthRedirectHandler)
 	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
+	http.HandleFunc("/coffeeCommand", handleCoffeeCommand)
 	http.HandleFunc("/", sayHello)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
@@ -89,9 +90,7 @@ func buttonTemplate() string {
 	button := `
 	<body>
 		Add this to Slack <br>
-		<a href="https://slack.com/oauth/authorize?client_id=75950428352.351830378721&scope=commands,groups:read,bot,chat:write:bot">
-		<img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
-		</a>
+		<a href="https://slack.com/oauth/authorize?client_id=75950428352.351830378721&scope=commands,groups:read,bot,chat:write:bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
 	</body>
 	`
 	return button
@@ -140,4 +139,81 @@ func handleOutgoingHooks(w http.ResponseWriter, r *http.Request) {
 	value, _ := strconv.ParseInt(text, 10, 32)
 	message := fmt.Sprintf(`{"text" : "%d"}`, value+1)
 	w.Write([]byte(message))
+}
+
+func handleCoffeeCommand(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("send menu")
+	r.ParseForm()
+	fmt.Println(r.PostForm)
+	triggerID := r.PostFormValue("trigger_id")
+	channelID := r.PostFormValue("channel_id")
+	fmt.Printf("\ntrigger id: %s channelID: %s", triggerID, channelID)
+	sendMenu(triggerID, channelID)
+}
+
+func sendMenu(triggerID, channelID string) {
+	attachment := slack.Attachment{}
+	attachment.Text = "Choose a beverage"
+	attachment.Fallback = "hmmmm, something wrong"
+	attachment.Color = "#3AA3E3"
+	attachment.CallbackID = "beverage_selection"
+
+	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{}
+	drinkOfTheWeekGroup.Text = "Drink of the Week"
+	drinkOfTheWeekGroup.Options = []slack.AttachmentActionOption{
+		slack.AttachmentActionOption{
+			Text:  "Vitality Latte",
+			Value: "special_1",
+		},
+		slack.AttachmentActionOption{
+			Text:  "Herbal Remedy Tea",
+			Value: "special_2",
+		},
+		slack.AttachmentActionOption{
+			Text:  "Iced Separator",
+			Value: "special_3",
+		},
+	}
+
+	regularDrinksGroup := slack.AttachmentActionOptionGroup{}
+	regularDrinksGroup.Text = "Regular Stuff"
+	regularDrinksGroup.Options = []slack.AttachmentActionOption{
+		slack.AttachmentActionOption{
+			Text:  "Steamed Milk",
+			Value: "steamed_milk",
+		},
+		slack.AttachmentActionOption{
+			Text:  "Hot Chocolate",
+			Value: "hot_chocolate",
+		},
+		slack.AttachmentActionOption{
+			Text:  "Tea",
+			Value: "tea",
+		},
+	}
+
+	action := slack.AttachmentAction{}
+	action.Name = "beverage_menu"
+	action.Text = "Select beverage"
+	action.Type = "select"
+	action.OptionGroups = []slack.AttachmentActionOptionGroup{regularDrinksGroup, drinkOfTheWeekGroup}
+
+	attachment.Actions = []slack.AttachmentAction{action}
+	message := slack.Message{}
+	message.Text = "What would you like to order ?"
+	message.Attachments = []slack.Attachment{attachment}
+
+	postParams := slack.NewPostMessageParameters()
+	postParams.Attachments = []slack.Attachment{attachment}
+	postParams.Channel = channelID
+
+	fmt.Print(postParams)
+	api := slack.New(utaAppToken)
+	api.PostMessage(channelID, "choose a beverage", postParams)
+}
+
+func readFile(filePath string) (content string, err error) {
+	data, err := ioutil.ReadFile(filePath)
+	content = string(data)
+	return
 }

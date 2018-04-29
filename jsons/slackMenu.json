@@ -1,0 +1,75 @@
+{
+    "text": "What would you like to order ?",
+    "response_type": "in_channel",
+    "attachments":
+    [
+        {
+            "text": "Choose a beverage",
+            "fallback": "hmm, something is off",
+            "color": "#3AA3E3",
+            "attachment_type": "default",
+            "callback_id": "beverage_selection",
+            "actions":
+            [
+                {
+                    "name": "beverage_type",
+                    "text": "I dont see this",
+                    "type": "select",
+                    "option_groups":
+                    [
+                        {
+                            "text": "Drink of the week",
+                            "options":
+                            [
+                                {
+                                    "text": "Vitality Latte",
+                                    "value": "special_1"
+                                },
+                                {
+                                    "text": "Herbal Remedy Tea",
+                                    "value": "special_2"
+                                },                                {
+                                    "text": "Iced Separator",
+                                    "value": "special_3"
+                                },
+                                {
+                                    "text": "Golden Latte",
+                                    "value": "special_4"
+                                },
+                                {
+                                    "text": "Immunity Latte",
+                                    "value": "special_5"
+                                }
+                            ]
+                        },
+                        {
+                            "text": "Regular Stuff",
+                            "options":
+                            [
+                                {
+                                    "text": "Steamed Milk",
+                                    "value": "steamed_milk"
+                                },
+                                {
+                                    "text": "Hot Chocolate",
+                                    "value": "hot_chocolate"
+                                },                                {
+                                    "text": "Drink of the week (as a gorup)",
+                                    "value": "checkers"
+                                },
+                                {
+                                    "text": "Tea",
+                                    "value": "tea"
+                                },
+                                {
+                                    "text": "Coffee",
+                                    "value": "coffee"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
