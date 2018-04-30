@@ -5,10 +5,14 @@ This will support a basic play grounds for the `utaApp` found at the link below.
 utaApp https://api.slack.com/apps/AABQEB4M7
 The server is configured to run on:
 https://goplatform.ngrok.io/
+https://slackcoffeebar.typeform.com/to/v6kODV
 
 add to slack button:	https://goplatform.ngrok.io/addToSlack
 OAuth handlers:			https://goplatform.ngrok.io/oauthRedirect
 outgoing hook url: 		https://goplatform.ngrok.io/outgoingHooks
+/barista command url:	https://goplatform.ngrok.io/coffeeCommand
+interactive url:		https://goplatform.ngrok.io/interactive
+Dynamic Menu:			https://goplatform.ngrok.io/dynamicMenu
 
 Notes:
 ------------------------------------------
@@ -22,7 +26,9 @@ TODO:
 */
 
 import (
+	"SlackPlatform/models"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -50,6 +56,7 @@ func main() {
 	http.HandleFunc("/oauthRedirect", oAuthRedirectHandler)
 	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
 	http.HandleFunc("/coffeeCommand", handleCoffeeCommand)
+	http.HandleFunc("/interactive", handleInteractiveMessages)
 	http.HandleFunc("/", sayHello)
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
@@ -158,47 +165,31 @@ func sendMenu(triggerID, channelID string) {
 	attachment.Color = "#3AA3E3"
 	attachment.CallbackID = "beverage_selection"
 
-	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{}
-	drinkOfTheWeekGroup.Text = "Drink of the Week"
-	drinkOfTheWeekGroup.Options = []slack.AttachmentActionOption{
-		slack.AttachmentActionOption{
-			Text:  "Vitality Latte",
-			Value: "special_1",
-		},
-		slack.AttachmentActionOption{
-			Text:  "Herbal Remedy Tea",
-			Value: "special_2",
-		},
-		slack.AttachmentActionOption{
-			Text:  "Iced Separator",
-			Value: "special_3",
-		},
+	//drinkOfTheWeekGroup
+	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{
+		Text:    "Drink of the Week",
+		Options: models.MakeAttachmentOptions([]string{"Vitality Latte", "Herbal Remedy Tea", "Iced Separator"}),
 	}
 
-	regularDrinksGroup := slack.AttachmentActionOptionGroup{}
-	regularDrinksGroup.Text = "Regular Stuff"
-	regularDrinksGroup.Options = []slack.AttachmentActionOption{
-		slack.AttachmentActionOption{
-			Text:  "Steamed Milk",
-			Value: "steamed_milk",
-		},
-		slack.AttachmentActionOption{
-			Text:  "Hot Chocolate",
-			Value: "hot_chocolate",
-		},
-		slack.AttachmentActionOption{
-			Text:  "Tea",
-			Value: "tea",
-		},
+	// Regular Drinks Menu
+	regularDrinksGroup := slack.AttachmentActionOptionGroup{
+		Text:    "Usual Drinks",
+		Options: models.MakeAttachmentOptions([]string{"Steamed Milk", "Hot Chocolate", "Tea"}),
 	}
 
-	action := slack.AttachmentAction{}
-	action.Name = "beverage_menu"
-	action.Text = "Select beverage"
-	action.Type = "select"
-	action.OptionGroups = []slack.AttachmentActionOptionGroup{regularDrinksGroup, drinkOfTheWeekGroup}
+	teaDrinksGroup := slack.AttachmentActionOptionGroup{
+		Text:    "Tea",
+		Options: models.MakeAttachmentOptions([]string{"London Fog", "San-Fran Fog", "Matcha Latte", "Tanglewood Ginger Chai"}),
+	}
 
-	attachment.Actions = []slack.AttachmentAction{action}
+	menuAction := slack.AttachmentAction{
+		Name:         "beverage_menu",
+		Text:         "Select beverage",
+		Type:         "select",
+		OptionGroups: []slack.AttachmentActionOptionGroup{regularDrinksGroup, teaDrinksGroup, drinkOfTheWeekGroup},
+	}
+
+	attachment.Actions = []slack.AttachmentAction{menuAction}
 	message := slack.Message{}
 	message.Text = "What would you like to order ?"
 	message.Attachments = []slack.Attachment{attachment}
@@ -216,4 +207,23 @@ func readFile(filePath string) (content string, err error) {
 	data, err := ioutil.ReadFile(filePath)
 	content = string(data)
 	return
+}
+
+func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("\n\nInteractive message")
+	r.ParseForm()
+	payloadString := r.PostFormValue("payload")
+	fmt.Print(payloadString)
+	fmt.Println("")
+	res := payload{}
+	json.Unmarshal([]byte(payloadString), &res)
+	fmt.Printf("\n triggerID : %s", res.TriggerID)
+}
+
+type payload struct {
+	TriggerID string `json:"trigger_id"`
+}
+
+func sendDialog() {
+
 }
