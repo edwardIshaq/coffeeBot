@@ -39,11 +39,19 @@ import (
 )
 
 const (
-	utaAppToken = "xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"
-	appURL      = "goplatform.ngrok.io"
-
+	appURL            = "goplatform.ngrok.io"
 	slackClientID     = "75950428352.351830378721"
 	slackClientSecret = "a56df86a6f1fae41f4efceaf20fb9842"
+	verificationToken = "8ycguzKPPcWvt7wIsud0a9EL"
+)
+
+/*
+utaApp info https://api.slack.com/apps/AABQEB4M7
+info which is related to a single team `eddie-beta`
+Needs to be stored in DB
+*/
+const (
+	utaAppToken = "xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"
 )
 
 var (
@@ -63,6 +71,9 @@ func main() {
 	}
 }
 
+/*
+Testing the api
+*/
 func getGroups() {
 	api := slack.New(utaAppToken)
 
