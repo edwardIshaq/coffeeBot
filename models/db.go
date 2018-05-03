@@ -15,7 +15,7 @@ func SetDatabase(database *sql.DB) {
 // DemoDB simple demo
 func DemoDB() {
 	println("we have db? :", db)
-	row := db.QueryRow(`SELECT "teamID", "accessToken" FROM team WHERE id = $1`, 1)
+	row := db.QueryRow(`SELECT team_id, access_token FROM team WHERE id = $1`, 1)
 	var teamID string
 	var accessToken string
 	row.Scan(&teamID, &accessToken)
