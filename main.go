@@ -28,13 +28,16 @@ TODO:
 import (
 	"SlackPlatform/models"
 	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
+	_ "github.com/lib/pq"
 	"github.com/nlopes/slack"
 )
 
@@ -59,6 +62,11 @@ var (
 )
 
 func main() {
+	db := connectToDatabase()
+	defer db.Close()
+	models.SetDatabase(db)
+	models.DemoDB()
+
 	//getGroups()
 	http.HandleFunc("/addToSlack", installWTAApplication)
 	http.HandleFunc("/oauthRedirect", oAuthRedirectHandler)
@@ -69,6 +77,17 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
+}
+
+func connectToDatabase() *sql.DB {
+	connStr := "user=goUser dbname=barista password=qwe123 sslmode=disable"
+	fmt.Println(connStr)
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(db)
+	return db
 }
 
 /*
