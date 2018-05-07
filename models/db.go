@@ -35,6 +35,7 @@ func NewDBWrapper(db *sql.DB) *DBWrapper {
 	}
 }
 
+// SaveToDB will serve as moc to save an object to db
 func (dbWrapper *DBWrapper) SaveToDB(value interface{}) {
 	fmt.Printf("DBWrapper: saving to DB: %v", dbWrapper)
 }

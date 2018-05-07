@@ -1,5 +1,14 @@
 package controller
 
+/*
+Notes:
+------------------------------------------
+Permissions update:
+	When ever the permissions are changed on the App's scopes
+	the button details (found in `func buttonTemplate()``) should be updated from https://api.slack.com/apps/AABQEB4M7/distribute?
+
+
+*/
 import (
 	"context"
 	"fmt"

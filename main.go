@@ -14,12 +14,6 @@ outgoing hook url: 		https://goplatform.ngrok.io/outgoingHooks
 interactive url:		https://goplatform.ngrok.io/interactive
 Dynamic Menu:			https://goplatform.ngrok.io/dynamicMenu
 
-Notes:
-------------------------------------------
-Permissions update:
-	When ever the permissions are changed on the App's scopes
-	the button details (found in `func buttonTemplate()``) should be updated from https://api.slack.com/apps/AABQEB4M7/distribute?
-
 TODO:
 ------------------------------------------
 [] save tokens to DB
@@ -28,7 +22,6 @@ TODO:
 import (
 	"SlackPlatform/controller"
 	"SlackPlatform/models"
-	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -72,8 +65,6 @@ func main() {
 	controller.StartupControllers(dbWrapper)
 
 	//getGroups()
-	// http.HandleFunc("/addToSlack", installWTAApplication)
-	// http.HandleFunc("/oauthRedirect", oAuthRedirectHandler)
 	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
 	http.HandleFunc("/coffeeCommand", handleCoffeeCommand)
 	http.HandleFunc("/interactive", handleInteractiveMessages)
@@ -123,49 +114,6 @@ func sayHello(w http.ResponseWriter, r *http.Request) {
 	message += " " + r.Method
 	message += "\nBody:" + fmt.Sprintf("%s", r.Body)
 	w.Write([]byte(message))
-}
-
-func buttonTemplate() string {
-	button := `
-	<body>
-		Add this to Slack <br>
-		<a href="https://slack.com/oauth/authorize?client_id=75950428352.351830378721&scope=commands,groups:read,bot,chat:write:bot"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" /></a>
-	</body>
-	`
-	return button
-}
-
-func appSuggestionURL() string {
-	return `<meta name="slack-app-id" content="AABQEB4M7">`
-}
-
-func appSuggestionHTML() string {
-	return `<meta name="slack-app-id" content="AABQEB4M7">`
-}
-
-func installWTAApplication(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(buttonTemplate()))
-}
-
-// code=75950428352.351913834208.ab4422d8cec8e7b134b8dbe7659e097cecb294122cfebee8456cad92f03d1732&state=
-func oAuthRedirectHandler(w http.ResponseWriter, r *http.Request) {
-	code := r.FormValue("code")
-	//use `code` to get `OAuthResponse` response back
-	oauthResponse, err := slack.GetOAuthResponseContext(context.Background(), slackClientID, slackClientSecret, code, redirectURL(), false)
-
-	message := "Something wrong happened"
-	if err == nil {
-		message = ""
-		message += fmt.Sprintf("\nError?: %v", err)
-		message += fmt.Sprintf("\nBot token: %v", oauthResponse.Bot)
-		message += fmt.Sprintf("\naccessToken: %v", oauthResponse.AccessToken)
-		message += fmt.Sprintf("\nscopes: %v", oauthResponse.Scope)
-	}
-	w.Write([]byte(message))
-}
-
-func redirectURL() string {
-	return "https://" + appURL + "/oauthRedirect"
 }
 
 //------------------------------------------
