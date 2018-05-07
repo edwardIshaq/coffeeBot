@@ -30,9 +30,9 @@ const (
 //	https://api.slack.com/dialogs#option_element_attributes#text_element_attributes
 type TextInputElement struct {
 	InputElement
-	MaxLength int              `json:"max_length"`
-	MinLength int              `json:"min_length"`
-	Hint      string           `json:"hint"`
+	MaxLength int              `json:"max_length,omitempty"`
+	MinLength int              `json:"min_length,omitempty"`
+	Hint      string           `json:"hint,omitempty"`
 	Subtype   TextInputSubtype `json:"subtype"`
 	Value     string           `json:"value"`
 }

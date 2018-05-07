@@ -189,54 +189,54 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	payloadString := r.PostFormValue("payload")
 	res := payload{}
 	json.Unmarshal([]byte(payloadString), &res)
-	fmt.Printf("\n triggerID : %s", res.TriggerID)
+	fmt.Printf("\ntriggerID : %s", res.TriggerID)
 
 	dialog := models.Dialog{
-		// TriggerID:   res.TriggerID,
 		CallbackID:  "barista.dialog",
 		Title:       "mohahahah",
-		SubmitLabel: "Coffee me",
+		SubmitLabel: "Order",
 	}
 
 	textInput := models.NewTextInput("test", "textInputLabel")
 	dialog.Elements = []models.TextInputElement{*textInput}
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {
-		fmt.Println("Sending dialog")
-		token := "xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"
+		fmt.Println("\nSending dialog")
 
-		postBody := url.Values{"token": {token}, "trigger_id": {res.TriggerID}, "dialog": {string(dialogjson)}}
-		fmt.Println(postBody)
+		postBody := url.Values{
+			"token":      {"xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"},
+			"trigger_id": {res.TriggerID},
+			"dialog":     {string(dialogjson)},
+		}
 
 		reqBody := strings.NewReader(postBody.Encode())
-		req, err := http.NewRequest("POST", slack.SLACK_API+"dialogs.open", reqBody)
+		req, err := http.NewRequest("POST", slack.SLACK_API+"dialog.open", reqBody)
 		if err != nil {
 			fmt.Println("error happened: ", err)
 			return
 		}
-		fmt.Println("req: ", req)
 
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		ctx := context.Background()
-		req = req.WithContext(ctx)
+		req = req.WithContext(context.Background())
+
+		//Fire the request
 		resp, err := slack.HTTPClient.Do(req)
-
 		if err != nil {
-			fmt.Println("error2 happened: ", err)
-		} else {
-			fmt.Printf("\nstatus: %d, resp: %v", resp.StatusCode, resp)
-			responseBody := new([]byte)
-
-			_, readError := resp.Body.Read(*responseBody)
-			if readError != nil {
-				fmt.Println("Error parsing response: ", readError)
-				return
-			}
-			fmt.Println("responseBody", string(*responseBody))
+			fmt.Println("\nResponseError: ", err)
+			return
 		}
 		defer resp.Body.Close()
-	}
 
+		if resp.StatusCode == http.StatusOK {
+			bodyBytes, err2 := ioutil.ReadAll(resp.Body)
+			if err2 != nil {
+				fmt.Printf("error reading body %v", err2)
+				return
+			}
+			bodyString := string(bodyBytes)
+			fmt.Println("\nbodyString: ", bodyString)
+		}
+	}
 }
 
 type payload struct {
