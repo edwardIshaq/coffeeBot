@@ -119,9 +119,6 @@ func sayHello(w http.ResponseWriter, r *http.Request) {
 //------------------------------------------
 //Slack outgoing hooks demo
 func handleOutgoingHooks(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("new outgoingWebhook from Slack")
-	r.ParseForm()
-	fmt.Println(r.PostForm)
 	text := r.PostFormValue("text")
 	value, _ := strconv.ParseInt(text, 10, 32)
 	message := fmt.Sprintf(`{"text" : "%d"}`, value+1)
@@ -129,12 +126,9 @@ func handleOutgoingHooks(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleCoffeeCommand(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("send menu")
 	r.ParseForm()
-	fmt.Println(r.PostForm)
 	triggerID := r.PostFormValue("trigger_id")
 	channelID := r.PostFormValue("channel_id")
-	fmt.Printf("\ntrigger id: %s channelID: %s", triggerID, channelID)
 	sendMenu(triggerID, channelID)
 }
 
