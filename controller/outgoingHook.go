@@ -1,4 +1,4 @@
-package controllers
+package controller
 
 /*
 Handler for outgoing hooks

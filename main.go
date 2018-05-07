@@ -26,6 +26,7 @@ TODO:
 */
 
 import (
+	"SlackPlatform/controller"
 	"SlackPlatform/models"
 	"context"
 	"database/sql"
@@ -65,11 +66,14 @@ func main() {
 	db := connectToDatabase()
 	defer db.Close()
 	models.SetDatabase(db)
-	models.DemoDB()
+	//models.DemoDB()
+
+	dbWrapper := models.NewDBWrapper(db)
+	controller.StartupControllers(dbWrapper)
 
 	//getGroups()
-	http.HandleFunc("/addToSlack", installWTAApplication)
-	http.HandleFunc("/oauthRedirect", oAuthRedirectHandler)
+	// http.HandleFunc("/addToSlack", installWTAApplication)
+	// http.HandleFunc("/oauthRedirect", oAuthRedirectHandler)
 	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
 	http.HandleFunc("/coffeeCommand", handleCoffeeCommand)
 	http.HandleFunc("/interactive", handleInteractiveMessages)
@@ -81,12 +85,10 @@ func main() {
 
 func connectToDatabase() *sql.DB {
 	connStr := "user=goUser dbname=barista password=qwe123 sslmode=disable"
-	fmt.Println(connStr)
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(db)
 	return db
 }
 
