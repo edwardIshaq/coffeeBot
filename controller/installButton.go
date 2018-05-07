@@ -56,7 +56,7 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 	message := "Something wrong happened"
 	if err == nil {
 		installer.OAuthResponse = *oauthResponse
-		installer.saveToDB()
+		dbClient.SaveToDB(installer)
 
 		message = ""
 		message += fmt.Sprintf("\nError?: %v", err)

@@ -1,13 +1,13 @@
 package controller
 
 import (
+	"SlackPlatform/crossfunction"
 	"SlackPlatform/models"
 )
 
 var (
 	installer *appInstaller
-	// dbWrapper *models.DBWrapper
-	dbClient DBClient
+	dbClient  crossfunction.DBClient
 )
 
 //To be passed threw the `StartupControllers`
@@ -29,9 +29,4 @@ func StartupControllers(dbWrapper *models.DBWrapper) {
 
 	dbClient = dbWrapper
 	installer.registerRoutes()
-}
-
-// DBClient to work with DBWrapper
-type DBClient interface {
-	SaveToDB(interface{})
 }
