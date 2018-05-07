@@ -18,7 +18,7 @@ const (
 
 // baseSelectInputElement a menu select for dialogs
 type baseSelectInputElement struct {
-	baseInputElement
+	InputElement
 	DataSource SelectDataSource `json:"data_source"`
 }
 
@@ -32,7 +32,7 @@ type SelectInputElement struct {
 func NewStaticMenu(name, label string) *SelectInputElement {
 	return &SelectInputElement{
 		baseSelectInputElement: baseSelectInputElement{
-			baseInputElement: baseInputElement{
+			InputElement: InputElement{
 				Type:  InputTypeSelect,
 				Name:  name,
 				Label: label,

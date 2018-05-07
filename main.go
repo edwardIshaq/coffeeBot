@@ -22,12 +22,14 @@ TODO:
 import (
 	"SlackPlatform/controller"
 	"SlackPlatform/models"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -53,6 +55,7 @@ const (
 
 var (
 	message = "Hello world"
+	api     = slack.New(utaAppToken)
 )
 
 func main() {
@@ -64,11 +67,11 @@ func main() {
 	dbWrapper := models.NewDBWrapper(db)
 	controller.StartupControllers(dbWrapper)
 
-	//getGroups()
 	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
 	http.HandleFunc("/coffeeCommand", handleCoffeeCommand)
 	http.HandleFunc("/interactive", handleInteractiveMessages)
 	http.HandleFunc("/", sayHello)
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
@@ -86,9 +89,7 @@ func connectToDatabase() *sql.DB {
 /*
 Testing the api
 */
-func getGroups() {
-	api := slack.New(utaAppToken)
-
+func getGroups(api *slack.Client) {
 	// If you set debugging, it will log all requests to the console
 	// Useful when encountering issues
 	// api.SetDebug(true)
@@ -173,7 +174,6 @@ func sendMenu(triggerID, channelID string) {
 	postParams.Channel = channelID
 
 	fmt.Print(postParams)
-	api := slack.New(utaAppToken)
 	api.PostMessage(channelID, "choose a beverage", postParams)
 }
 
@@ -184,14 +184,59 @@ func readFile(filePath string) (content string, err error) {
 }
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("\n\nInteractive message")
+	fmt.Println("Interactive message handler")
 	r.ParseForm()
 	payloadString := r.PostFormValue("payload")
-	fmt.Print(payloadString)
-	fmt.Println("")
 	res := payload{}
 	json.Unmarshal([]byte(payloadString), &res)
 	fmt.Printf("\n triggerID : %s", res.TriggerID)
+
+	dialog := models.Dialog{
+		// TriggerID:   res.TriggerID,
+		CallbackID:  "barista.dialog",
+		Title:       "mohahahah",
+		SubmitLabel: "Coffee me",
+	}
+
+	textInput := models.NewTextInput("test", "textInputLabel")
+	dialog.Elements = []models.TextInputElement{*textInput}
+
+	if dialogjson, err := json.Marshal(dialog); err == nil {
+		fmt.Println("Sending dialog")
+		token := "xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"
+
+		postBody := url.Values{"token": {token}, "trigger_id": {res.TriggerID}, "dialog": {string(dialogjson)}}
+		fmt.Println(postBody)
+
+		reqBody := strings.NewReader(postBody.Encode())
+		req, err := http.NewRequest("POST", slack.SLACK_API+"dialogs.open", reqBody)
+		if err != nil {
+			fmt.Println("error happened: ", err)
+			return
+		}
+		fmt.Println("req: ", req)
+
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		ctx := context.Background()
+		req = req.WithContext(ctx)
+		resp, err := slack.HTTPClient.Do(req)
+
+		if err != nil {
+			fmt.Println("error2 happened: ", err)
+		} else {
+			fmt.Printf("\nstatus: %d, resp: %v", resp.StatusCode, resp)
+			responseBody := new([]byte)
+
+			_, readError := resp.Body.Read(*responseBody)
+			if readError != nil {
+				fmt.Println("Error parsing response: ", readError)
+				return
+			}
+			fmt.Println("responseBody", string(*responseBody))
+		}
+		defer resp.Body.Close()
+	}
+
 }
 
 type payload struct {

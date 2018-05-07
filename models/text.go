@@ -29,7 +29,7 @@ const (
 // TextInputElement subtype of InputElement
 //	https://api.slack.com/dialogs#option_element_attributes#text_element_attributes
 type TextInputElement struct {
-	baseInputElement
+	InputElement
 	MaxLength int              `json:"max_length"`
 	MinLength int              `json:"min_length"`
 	Hint      string           `json:"hint"`
@@ -40,7 +40,7 @@ type TextInputElement struct {
 // NewTextInput constructor for a `text` input
 func NewTextInput(name, label string) *TextInputElement {
 	return &TextInputElement{
-		baseInputElement: baseInputElement{
+		InputElement: InputElement{
 			Type:  InputTypeText,
 			Name:  name,
 			Label: label,
@@ -51,7 +51,7 @@ func NewTextInput(name, label string) *TextInputElement {
 // NewTextAreaInput constructor for a `textarea` input
 func NewTextAreaInput(name, label string) *TextInputElement {
 	return &TextInputElement{
-		baseInputElement: baseInputElement{
+		InputElement: InputElement{
 			Type:  InputTypeTextArea,
 			Name:  name,
 			Label: label,
