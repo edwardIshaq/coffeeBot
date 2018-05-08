@@ -16,25 +16,25 @@ const (
 	UsersDataSource SelectDataSource = "users"
 )
 
-// baseSelectInputElement a menu select for dialogs
-type baseSelectInputElement struct {
-	InputElement
+// baseSelectDialogInput a menu select for dialogs
+type baseSelectDialogInput struct {
+	DialogInput
 	DataSource SelectDataSource `json:"data_source"`
 }
 
-// SelectInputElement can support all type except Dynamic menu
-type SelectInputElement struct {
-	baseSelectInputElement
+// StaticSelectDialogInput can support all type except Dynamic menu
+type StaticSelectDialogInput struct {
+	baseSelectDialogInput
 	Value   string         `json:"value"` //This option is invalid in external, where you must use selected_options
 	Options []SelectOption `json:"options"`
 }
 
 // NewStaticMenu constructor for a `static` datasource menu input
-func NewStaticMenu(name, label string, options []string) *SelectInputElement {
+func NewStaticMenu(name, label string, options []string) *StaticSelectDialogInput {
 	selectOptions := convertStringsToSelectOptions(options)
-	return &SelectInputElement{
-		baseSelectInputElement: baseSelectInputElement{
-			InputElement: InputElement{
+	return &StaticSelectDialogInput{
+		baseSelectDialogInput: baseSelectDialogInput{
+			DialogInput: DialogInput{
 				Type:  InputTypeSelect,
 				Name:  name,
 				Label: label,
@@ -54,12 +54,12 @@ func convertStringsToSelectOptions(options []string) []SelectOption {
 
 // DynamicSelectInputElement special case for Dynamic since regular menu cant hold `value`
 type DynamicSelectInputElement struct {
-	baseSelectInputElement
+	baseSelectDialogInput
 }
 
 // ExternalSelectInputElement is a special case of `SelectInputElement``
 type ExternalSelectInputElement struct {
-	baseSelectInputElement
+	baseSelectDialogInput
 	SelectedOptions Options `json:"selected_options"` //This option is invalid in external, where you must use selected_options
 }
 

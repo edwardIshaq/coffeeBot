@@ -26,10 +26,10 @@ const (
 	URLTextInputSubtype TextInputSubtype = "url"
 )
 
-// TextInputElement subtype of InputElement
+// TextInputElement subtype of DialogInput
 //	https://api.slack.com/dialogs#option_element_attributes#text_element_attributes
 type TextInputElement struct {
-	InputElement
+	DialogInput
 	MaxLength int              `json:"max_length,omitempty"`
 	MinLength int              `json:"min_length,omitempty"`
 	Hint      string           `json:"hint,omitempty"`
@@ -40,7 +40,7 @@ type TextInputElement struct {
 // NewTextInput constructor for a `text` input
 func NewTextInput(name, label string) *TextInputElement {
 	return &TextInputElement{
-		InputElement: InputElement{
+		DialogInput: DialogInput{
 			Type:  InputTypeText,
 			Name:  name,
 			Label: label,
@@ -51,7 +51,7 @@ func NewTextInput(name, label string) *TextInputElement {
 // NewTextAreaInput constructor for a `textarea` input
 func NewTextAreaInput(name, label string) *TextInputElement {
 	return &TextInputElement{
-		InputElement: InputElement{
+		DialogInput: DialogInput{
 			Type:  InputTypeTextArea,
 			Name:  name,
 			Label: label,
