@@ -16,55 +16,22 @@ const (
 	UsersDataSource SelectDataSource = "users"
 )
 
-// baseSelectDialogInput a menu select for dialogs
-type baseSelectDialogInput struct {
+// baseSelect a menu select for dialogs
+type baseSelect struct {
 	DialogInput
 	DataSource SelectDataSource `json:"data_source"`
 }
 
+//------------------------------------------
+//		StaticSelectDialogInput
+//------------------------------------------
+
 // StaticSelectDialogInput can support all type except Dynamic menu
 type StaticSelectDialogInput struct {
-	baseSelectDialogInput
+	baseSelect
 	Value   string         `json:"value"` //This option is invalid in external, where you must use selected_options
 	Options []SelectOption `json:"options"`
 }
-
-// NewStaticMenu constructor for a `static` datasource menu input
-func NewStaticMenu(name, label string, options []string) *StaticSelectDialogInput {
-	selectOptions := convertStringsToSelectOptions(options)
-	return &StaticSelectDialogInput{
-		baseSelectDialogInput: baseSelectDialogInput{
-			DialogInput: DialogInput{
-				Type:  InputTypeSelect,
-				Name:  name,
-				Label: label,
-			},
-			DataSource: StaticDataSource,
-		},
-		Options: selectOptions,
-	}
-}
-func convertStringsToSelectOptions(options []string) []SelectOption {
-	selectOptions := make([]SelectOption, len(options))
-	for idx, value := range options {
-		selectOptions[idx] = newSelectOption(value)
-	}
-	return selectOptions
-}
-
-// DynamicSelectInputElement special case for Dynamic since regular menu cant hold `value`
-type DynamicSelectInputElement struct {
-	baseSelectDialogInput
-}
-
-// ExternalSelectInputElement is a special case of `SelectInputElement``
-type ExternalSelectInputElement struct {
-	baseSelectDialogInput
-	SelectedOptions Options `json:"selected_options"` //This option is invalid in external, where you must use selected_options
-}
-
-// Options an alias for `[]SelectOption`
-type Options []SelectOption
 
 // SelectOption is an option for the user to select from the menu
 type SelectOption struct {
@@ -72,16 +39,86 @@ type SelectOption struct {
 	Value string `json:"value"`
 }
 
-// newSelectOption will create an option with the `value` provided
-func newSelectOption(value string) SelectOption {
-	return SelectOption{
-		Label: value,
-		Value: value,
+func makeOptions(options []string) []SelectOption {
+	selectOptions := make([]SelectOption, len(options))
+	for idx, value := range options {
+		selectOptions[idx] = SelectOption{
+			Label: value,
+			Value: value,
+		}
 	}
+	return selectOptions
+}
+
+// NewStaticMenu constructor for a `static` datasource menu input
+func NewStaticMenu(name, label string, options []string) *StaticSelectDialogInput {
+	return &StaticSelectDialogInput{
+		baseSelect: baseSelect{
+			DialogInput: DialogInput{
+				Type:  InputTypeSelect,
+				Name:  name,
+				Label: label,
+			},
+			DataSource: StaticDataSource,
+		},
+		Options: makeOptions(options),
+	}
+}
+
+//------------------------------------------
+//		GroupedSelectDialogInput
+//------------------------------------------
+
+// GroupedSelectDialogInput same as `StaticSelectDialogInput` but with grouped options
+type GroupedSelectDialogInput struct {
+	baseSelect
+	Value        string
+	OptionGroups []OptionGroup `json:"option_groups"`
 }
 
 // OptionGroup is a collection of options for creating a segmented table
 type OptionGroup struct {
 	Label   string         `json:"label"`
 	Options []SelectOption `json:"options"`
+}
+
+// NewGroupedSelectDialoginput a grouped options select input for Dialogs
+func NewGroupedSelectDialoginput(name, label string, groups map[string][]string) *GroupedSelectDialogInput {
+	optionGroups := []OptionGroup{}
+	for groupName, options := range groups {
+		optionGroups = append(optionGroups, OptionGroup{
+			Label:   groupName,
+			Options: makeOptions(options),
+		})
+	}
+	return &GroupedSelectDialogInput{
+		baseSelect: baseSelect{
+			DialogInput: DialogInput{
+				Type:  InputTypeSelect,
+				Name:  name,
+				Label: label,
+			},
+			DataSource: StaticDataSource,
+		},
+		OptionGroups: optionGroups,
+	}
+}
+
+//------------------------------------------
+//		DynamicSelectInputElement
+//------------------------------------------
+
+// DynamicSelectInputElement special case for Dynamic since regular menu cant hold `value`
+type DynamicSelectInputElement struct {
+	baseSelect
+}
+
+//------------------------------------------
+//		ExternalSelectInputElement
+//------------------------------------------
+
+// ExternalSelectInputElement is a special case of `SelectInputElement``
+type ExternalSelectInputElement struct {
+	baseSelect
+	SelectedOptions []SelectOption `json:"selected_options"` //This option is invalid in external, where you must use selected_options
 }

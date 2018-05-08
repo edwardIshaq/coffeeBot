@@ -1,17 +1,5 @@
 package models
 
-// InputType is the type of the dialog input type
-type InputType string
-
-const (
-	// InputTypeText textfield input
-	InputTypeText InputType = "text"
-	// InputTypeTextArea textarea input
-	InputTypeTextArea InputType = "textarea"
-	// InputTypeSelect textfield input
-	InputTypeSelect InputType = "select"
-)
-
 // TextInputSubtype Accepts email, number, tel, or url. In some form factors, optimized input is provided for this subtype.
 type TextInputSubtype string
 

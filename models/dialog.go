@@ -10,3 +10,24 @@ type Dialog struct {
 	SubmitLabel    string        `json:"submit_label,omitempty"`
 	Elements       []interface{} `json:"elements"`
 }
+
+// DialogInput for dialogs input type text or menu
+type DialogInput struct {
+	Type        InputType `json:"type"`
+	Label       string    `json:"label"`
+	Name        string    `json:"name"`
+	Placeholder string    `json:"placeholder"`
+	Optional    bool      `json:"optional"`
+}
+
+// InputType is the type of the dialog input type
+type InputType string
+
+const (
+	// InputTypeText textfield input
+	InputTypeText InputType = "text"
+	// InputTypeTextArea textarea input
+	InputTypeTextArea InputType = "textarea"
+	// InputTypeSelect textfield input
+	InputTypeSelect InputType = "select"
+)
