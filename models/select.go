@@ -62,9 +62,10 @@ func NewStaticSelectDialogInput(name, label string, options []string) *StaticSel
 	return &StaticSelectDialogInput{
 		baseSelect: baseSelect{
 			DialogInput: DialogInput{
-				Type:  InputTypeSelect,
-				Name:  name,
-				Label: label,
+				Type:     InputTypeSelect,
+				Name:     name,
+				Label:    label,
+				Optional: true,
 			},
 			DataSource: StaticDataSource,
 		},

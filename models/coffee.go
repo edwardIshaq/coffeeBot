@@ -1,5 +1,7 @@
 package models
 
+import "fmt"
+
 // DrinkSize is the drink size of a beverage
 type DrinkSize string
 
@@ -64,4 +66,41 @@ const (
 // AllSyrupOptions a list of all the Syrup options
 func AllSyrupOptions() []string {
 	return []string{"Mint", "Lavender", "Chocolate", "Vanilla", "Honey"}
+}
+
+// Beverage type will hold the default selections for the menus
+type Beverage struct {
+	Name       string
+	Espresso   string
+	Syrup      string
+	Temperture string
+	Comment    string
+}
+
+func beverageList() []Beverage {
+	return []Beverage{
+		Beverage{
+			Name:       "Vitality Latte",
+			Temperture: string(tempHot),
+			Syrup:      string(Honey),
+		},
+		Beverage{
+			Name:       "Espresso",
+			Espresso:   string(EspressoDouble),
+			Temperture: string(tempHot),
+		},
+	}
+}
+
+// BeverageByName gets you a preset beverage or an empty one if not found
+func BeverageByName(name string) Beverage {
+	list := beverageList()
+	fmt.Printf("\nsearching for %s in list %v ", name, list)
+	for _, bev := range list {
+		if bev.Name == name {
+			fmt.Printf("\nfound %v ", bev)
+			return bev
+		}
+	}
+	return Beverage{Name: name}
 }

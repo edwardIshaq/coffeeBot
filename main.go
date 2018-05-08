@@ -140,6 +140,12 @@ func sendMenu(triggerID, channelID string) {
 	attachment.Color = "#3AA3E3"
 	attachment.CallbackID = "beverage_selection"
 
+	// Coffees
+	coffeeGroup := slack.AttachmentActionOptionGroup{
+		Text:    "Coffee",
+		Options: models.MakeAttachmentOptions([]string{"Espresso", "Macchiato", "Gibraltar / Cortado", "Cappuccino"}),
+	}
+
 	//drinkOfTheWeekGroup
 	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Drink of the Week",
@@ -152,6 +158,7 @@ func sendMenu(triggerID, channelID string) {
 		Options: models.MakeAttachmentOptions([]string{"Steamed Milk", "Hot Chocolate", "Tea"}),
 	}
 
+	// Tea
 	teaDrinksGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Tea",
 		Options: models.MakeAttachmentOptions([]string{"London Fog", "San-Fran Fog", "Matcha Latte", "Tanglewood Ginger Chai"}),
@@ -161,7 +168,7 @@ func sendMenu(triggerID, channelID string) {
 		Name:         "beverage_menu",
 		Text:         "Select beverage",
 		Type:         "select",
-		OptionGroups: []slack.AttachmentActionOptionGroup{regularDrinksGroup, teaDrinksGroup, drinkOfTheWeekGroup},
+		OptionGroups: []slack.AttachmentActionOptionGroup{coffeeGroup, regularDrinksGroup, teaDrinksGroup, drinkOfTheWeekGroup},
 	}
 
 	attachment.Actions = []slack.AttachmentAction{menuAction}
@@ -184,19 +191,16 @@ func readFile(filePath string) (content string, err error) {
 }
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
 	payloadString := r.PostFormValue("payload")
-	res := payload{}
-	json.Unmarshal([]byte(payloadString), &res)
-	fmt.Printf("\ntriggerID : %s", res.TriggerID)
-	dialog := makeDialog()
+	chosenBeverage, triggerID := models.GetSelectedOption([]byte(payloadString))
+
+	dialog := makeDialog(chosenBeverage)
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {
-		fmt.Println("\nSending dialog")
 
 		postBody := url.Values{
 			"token":      {"xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"},
-			"trigger_id": {res.TriggerID},
+			"trigger_id": {triggerID},
 			"dialog":     {string(dialogjson)},
 		}
 
@@ -234,20 +238,26 @@ type payload struct {
 	TriggerID string `json:"trigger_id"`
 }
 
-func makeDialog() models.Dialog {
-	elements := []interface{}{
-		models.NewStaticSelectDialogInput("drinkSize", "Drink Size", models.AllDrinkSizes()),
-		models.NewStaticSelectDialogInput("espresso", "Espresso Options", models.AllEspressoOptions()),
-		models.NewStaticSelectDialogInput("syrup", "Syrup", models.AllSyrupOptions()),
-		models.NewStaticSelectDialogInput("floor", "Pickup", []string{"3rd Floor", "5th Floor"}),
-		models.NewStaticSelectDialogInput("temperture", "Temperture", []string{"Hot", "Iced"}),
-	}
+func makeDialog(chosenBeverage string) models.Dialog {
+	presetBeverage := models.BeverageByName(chosenBeverage)
+
+	espressMenu := models.NewStaticSelectDialogInput("espresso", "Espresso Options", models.AllEspressoOptions())
+	espressMenu.Value = presetBeverage.Espresso
+
+	syrupMenu := models.NewStaticSelectDialogInput("syrup", "Syrup", models.AllSyrupOptions())
+	syrupMenu.Value = presetBeverage.Syrup
 
 	dialog := models.Dialog{
 		CallbackID:  "barista.dialog",
-		Title:       "Customize your drink",
+		Title:       models.DialogTitle(chosenBeverage),
 		SubmitLabel: "Order",
-		Elements:    elements,
+		Elements: []interface{}{
+			models.NewStaticSelectDialogInput("drinkSize", "Drink Size", models.AllDrinkSizes()),
+			espressMenu,
+			syrupMenu,
+			models.NewStaticSelectDialogInput("floor", "Pickup", []string{"3rd Floor", "5th Floor"}),
+			models.NewStaticSelectDialogInput("temperture", "Temperture", []string{"Hot", "Iced"}),
+		},
 	}
 	return dialog
 }

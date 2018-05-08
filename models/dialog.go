@@ -31,3 +31,12 @@ const (
 	// InputTypeSelect textfield input
 	InputTypeSelect InputType = "select"
 )
+
+// DialogTitle makes a title into a dialog title by caping it of to 24 chars
+func DialogTitle(title string) string {
+	const maxLength = 24
+	if len(title) < maxLength {
+		return title
+	}
+	return title[:21] + "..."
+}
