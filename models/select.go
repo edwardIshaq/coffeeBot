@@ -94,24 +94,33 @@ func NewGroupedSelectDialoginput(name, label string, groups map[string][]string)
 	}
 }
 
-//------------------------------------------
-//		groupedSelectDialogInput
-//------------------------------------------
+func newPresetSelect(name, label string, dataSourceType SelectDataSource) *StaticSelectDialogInput {
+	return &StaticSelectDialogInput{
+		baseSelect: baseSelect{
+			DialogInput: DialogInput{
+				Type:  InputTypeSelect,
+				Label: label,
+				Name:  name,
+			},
+			DataSource: dataSourceType,
+		},
+	}
 
-// groupedSelectDialogInput same as `StaticSelectDialogInput` but with grouped options
-// type groupedSelectDialogInput struct {
-// 	baseSelect
-// 	Value        string
-// 	OptionGroups []OptionGroup `json:"option_groups"`
-// }
+}
 
-//------------------------------------------
-//		DynamicSelectInputElement
-//------------------------------------------
+// NewConversationsSelect returns a `Conversations` select
+func NewConversationsSelect(name, label string) *StaticSelectDialogInput {
+	return newPresetSelect(name, label, ConversationsDataSource)
+}
 
-// DynamicSelectInputElement special case for Dynamic since regular menu cant hold `value`
-type DynamicSelectInputElement struct {
-	baseSelect
+// NewChannelsSelect returns a `Channels` select
+func NewChannelsSelect(name, label string) *StaticSelectDialogInput {
+	return newPresetSelect(name, label, ChannelsDataSource)
+}
+
+// NewUsersSelect returns a `Users` select
+func NewUsersSelect(name, label string) *StaticSelectDialogInput {
+	return newPresetSelect(name, label, UsersDataSource)
 }
 
 //------------------------------------------
