@@ -197,8 +197,10 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 		SubmitLabel: "Order",
 	}
 
-	textInput := models.NewTextInput("test", "textInputLabel")
-	dialog.Elements = []models.TextInputElement{*textInput}
+	elements := make([]interface{}, 2)
+	elements[0] = models.NewTextInput("test", "textInputLabel")
+	elements[1] = models.NewStaticMenu("MENU_NAME", "MENU_LABEL", []string{"opt 1", "opt 2", "opt 3"})
+	dialog.Elements = elements
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {
 		fmt.Println("\nSending dialog")

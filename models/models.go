@@ -28,15 +28,10 @@ func (m MenuOption) attachmentOption() slack.AttachmentActionOption {
 // Menu is an array of `Menu`
 type Menu []MenuOption
 
-// ConvertToAttachmentActionOptions converts Menus ->
-func (ms Menu) ConvertToAttachmentActionOptions() []slack.AttachmentActionOption {
-	var options []slack.AttachmentActionOption
-
-	for _, m := range ms {
-		option := m.attachmentOption()
-		options = append(options, option)
-	}
-	return options
+// MakeAttachmentOptions converts an array of strings to slack menu options
+func MakeAttachmentOptions(ss []string) []slack.AttachmentActionOption {
+	menu := convertToMenuOptions(ss)
+	return menu.convertToAttachmentActionOptions()
 }
 
 func convertToMenuOptions(ss []string) Menu {
@@ -47,8 +42,13 @@ func convertToMenuOptions(ss []string) Menu {
 	return menuOptions
 }
 
-// MakeAttachmentOptions converts an array of strings to slack menu options
-func MakeAttachmentOptions(ss []string) []slack.AttachmentActionOption {
-	menu := convertToMenuOptions(ss)
-	return menu.ConvertToAttachmentActionOptions()
+// convertToAttachmentActionOptions converts Menus -> []slack.AttachmentActionOption
+func (ms Menu) convertToAttachmentActionOptions() []slack.AttachmentActionOption {
+	var options []slack.AttachmentActionOption
+
+	for _, m := range ms {
+		option := m.attachmentOption()
+		options = append(options, option)
+	}
+	return options
 }

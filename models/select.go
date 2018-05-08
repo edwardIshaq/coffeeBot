@@ -25,11 +25,13 @@ type baseSelectInputElement struct {
 // SelectInputElement can support all type except Dynamic menu
 type SelectInputElement struct {
 	baseSelectInputElement
-	Value string `json:"value"` //This option is invalid in external, where you must use selected_options
+	Value   string         `json:"value"` //This option is invalid in external, where you must use selected_options
+	Options []SelectOption `json:"options"`
 }
 
 // NewStaticMenu constructor for a `static` datasource menu input
-func NewStaticMenu(name, label string) *SelectInputElement {
+func NewStaticMenu(name, label string, options []string) *SelectInputElement {
+	selectOptions := convertStringsToSelectOptions(options)
 	return &SelectInputElement{
 		baseSelectInputElement: baseSelectInputElement{
 			InputElement: InputElement{
@@ -39,7 +41,15 @@ func NewStaticMenu(name, label string) *SelectInputElement {
 			},
 			DataSource: StaticDataSource,
 		},
+		Options: selectOptions,
 	}
+}
+func convertStringsToSelectOptions(options []string) []SelectOption {
+	selectOptions := make([]SelectOption, len(options))
+	for idx, value := range options {
+		selectOptions[idx] = newSelectOption(value)
+	}
+	return selectOptions
 }
 
 // DynamicSelectInputElement special case for Dynamic since regular menu cant hold `value`
@@ -60,6 +70,14 @@ type Options []SelectOption
 type SelectOption struct {
 	Label string `json:"label"`
 	Value string `json:"value"`
+}
+
+// newSelectOption will create an option with the `value` provided
+func newSelectOption(value string) SelectOption {
+	return SelectOption{
+		Label: value,
+		Value: value,
+	}
 }
 
 // OptionGroup is a collection of options for creating a segmented table
