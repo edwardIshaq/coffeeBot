@@ -235,12 +235,13 @@ type payload struct {
 }
 
 func makeDialog() models.Dialog {
-	elements := make([]interface{}, 5)
-	elements[0] = models.NewStaticSelectDialogInput("drinkSize", "Drink Size", models.AllDrinkSizes())
-	elements[1] = models.NewStaticSelectDialogInput("espresso", "Espresso Options", models.AllEspressoOptions())
-	elements[2] = models.NewStaticSelectDialogInput("syrup", "Syrup", models.AllSyrupOptions())
-	elements[3] = models.NewStaticSelectDialogInput("floor", "Pickup", []string{"3rd Floor", "5th Floor"})
-	elements[4] = models.NewStaticSelectDialogInput("temperture", "Temperture", []string{"Hot", "Iced"})
+	elements := []interface{}{
+		models.NewStaticSelectDialogInput("drinkSize", "Drink Size", models.AllDrinkSizes()),
+		models.NewStaticSelectDialogInput("espresso", "Espresso Options", models.AllEspressoOptions()),
+		models.NewStaticSelectDialogInput("syrup", "Syrup", models.AllSyrupOptions()),
+		models.NewStaticSelectDialogInput("floor", "Pickup", []string{"3rd Floor", "5th Floor"}),
+		models.NewStaticSelectDialogInput("temperture", "Temperture", []string{"Hot", "Iced"}),
+	}
 
 	dialog := models.Dialog{
 		CallbackID:  "barista.dialog",
