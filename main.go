@@ -199,12 +199,12 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 
 	elements := make([]interface{}, 3)
 	elements[0] = models.NewTextInput("test", "textInputLabel")
-	elements[1] = models.NewStaticMenu("MENU_NAME", "MENU_LABEL", []string{"opt 1", "opt 2", "opt 3"})
-	groupedOptions := map[string][]string{
-		"Group1": {"A1", "A2", "A3", "A4", "A5", "A6"},
-		"Group2": {"B1", "B2", "B3", "B4", "B5", "B6"},
-	}
-	elements[2] = models.NewGroupedSelectDialoginput("GROUPED_INPUT", "GROUPED_LABEL", groupedOptions)
+	elements[1] = models.NewStaticSelectDialogInput("MENU_NAME", "MENU_LABEL", []string{"opt 1", "opt 2", "opt 3"})
+	elements[2] = models.NewGroupedSelectDialoginput("GROUPED_INPUT", "GROUPED_LABEL",
+		map[string][]string{
+			"Group1": {"A1", "A2", "A3", "A4", "A5", "A6"},
+			"Group2": {"B1", "B2", "B3", "B4", "B5", "B6"},
+		})
 	dialog.Elements = elements
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {

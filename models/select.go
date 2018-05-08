@@ -29,14 +29,21 @@ type baseSelect struct {
 // StaticSelectDialogInput can support all type except Dynamic menu
 type StaticSelectDialogInput struct {
 	baseSelect
-	Value   string         `json:"value"` //This option is invalid in external, where you must use selected_options
-	Options []SelectOption `json:"options"`
+	Value        string         `json:"value"` //This option is invalid in external, where you must use selected_options
+	Options      []SelectOption `json:"options,omitempty"`
+	OptionGroups []OptionGroup  `json:"option_groups,omitempty"`
 }
 
 // SelectOption is an option for the user to select from the menu
 type SelectOption struct {
 	Label string `json:"label"`
 	Value string `json:"value"`
+}
+
+// OptionGroup is a collection of options for creating a segmented table
+type OptionGroup struct {
+	Label   string         `json:"label"`
+	Options []SelectOption `json:"options"`
 }
 
 func makeOptions(options []string) []SelectOption {
@@ -50,8 +57,8 @@ func makeOptions(options []string) []SelectOption {
 	return selectOptions
 }
 
-// NewStaticMenu constructor for a `static` datasource menu input
-func NewStaticMenu(name, label string, options []string) *StaticSelectDialogInput {
+// NewStaticSelectDialogInput constructor for a `static` datasource menu input
+func NewStaticSelectDialogInput(name, label string, options []string) *StaticSelectDialogInput {
 	return &StaticSelectDialogInput{
 		baseSelect: baseSelect{
 			DialogInput: DialogInput{
@@ -65,25 +72,8 @@ func NewStaticMenu(name, label string, options []string) *StaticSelectDialogInpu
 	}
 }
 
-//------------------------------------------
-//		GroupedSelectDialogInput
-//------------------------------------------
-
-// GroupedSelectDialogInput same as `StaticSelectDialogInput` but with grouped options
-type GroupedSelectDialogInput struct {
-	baseSelect
-	Value        string
-	OptionGroups []OptionGroup `json:"option_groups"`
-}
-
-// OptionGroup is a collection of options for creating a segmented table
-type OptionGroup struct {
-	Label   string         `json:"label"`
-	Options []SelectOption `json:"options"`
-}
-
 // NewGroupedSelectDialoginput a grouped options select input for Dialogs
-func NewGroupedSelectDialoginput(name, label string, groups map[string][]string) *GroupedSelectDialogInput {
+func NewGroupedSelectDialoginput(name, label string, groups map[string][]string) *StaticSelectDialogInput {
 	optionGroups := []OptionGroup{}
 	for groupName, options := range groups {
 		optionGroups = append(optionGroups, OptionGroup{
@@ -91,7 +81,7 @@ func NewGroupedSelectDialoginput(name, label string, groups map[string][]string)
 			Options: makeOptions(options),
 		})
 	}
-	return &GroupedSelectDialogInput{
+	return &StaticSelectDialogInput{
 		baseSelect: baseSelect{
 			DialogInput: DialogInput{
 				Type:  InputTypeSelect,
@@ -103,6 +93,17 @@ func NewGroupedSelectDialoginput(name, label string, groups map[string][]string)
 		OptionGroups: optionGroups,
 	}
 }
+
+//------------------------------------------
+//		groupedSelectDialogInput
+//------------------------------------------
+
+// groupedSelectDialogInput same as `StaticSelectDialogInput` but with grouped options
+// type groupedSelectDialogInput struct {
+// 	baseSelect
+// 	Value        string
+// 	OptionGroups []OptionGroup `json:"option_groups"`
+// }
 
 //------------------------------------------
 //		DynamicSelectInputElement
