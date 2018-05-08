@@ -184,32 +184,12 @@ func readFile(filePath string) (content string, err error) {
 }
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("Interactive message handler")
 	r.ParseForm()
 	payloadString := r.PostFormValue("payload")
 	res := payload{}
 	json.Unmarshal([]byte(payloadString), &res)
 	fmt.Printf("\ntriggerID : %s", res.TriggerID)
-
-	dialog := models.Dialog{
-		CallbackID:  "barista.dialog",
-		Title:       "mohahahah",
-		SubmitLabel: "Order",
-	}
-
-	elements := make([]interface{}, 5)
-	// elements[0] = models.NewTextInput("test", "textInputLabel")
-	elements[0] = models.NewUsersSelect("Users", "Choose a User")
-	elements[1] = models.NewStaticSelectDialogInput("MENU_NAME", "MENU_LABEL", []string{"opt 1", "opt 2", "opt 3"})
-	elements[2] = models.NewGroupedSelectDialoginput("GROUPED_INPUT", "GROUPED_LABEL",
-		map[string][]string{
-			"Group1": {"A1", "A2", "A3", "A4", "A5", "A6"},
-			"Group2": {"B1", "B2", "B3", "B4", "B5", "B6"},
-		})
-	elements[3] = models.NewConversationsSelect("convoSelect", "Convo")
-	elements[4] = models.NewChannelsSelect("Channels", "Choose a channel")
-
-	dialog.Elements = elements
+	dialog := makeDialog()
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {
 		fmt.Println("\nSending dialog")
@@ -254,6 +234,19 @@ type payload struct {
 	TriggerID string `json:"trigger_id"`
 }
 
-func sendDialog() {
+func makeDialog() models.Dialog {
+	elements := make([]interface{}, 5)
+	elements[0] = models.NewStaticSelectDialogInput("drinkSize", "Drink Size", models.AllDrinkSizes())
+	elements[1] = models.NewStaticSelectDialogInput("espresso", "Espresso Options", models.AllEspressoOptions())
+	elements[2] = models.NewStaticSelectDialogInput("syrup", "Syrup", models.AllSyrupOptions())
+	elements[3] = models.NewStaticSelectDialogInput("floor", "Pickup", []string{"3rd Floor", "5th Floor"})
+	elements[4] = models.NewStaticSelectDialogInput("temperture", "Temperture", []string{"Hot", "Iced"})
 
+	dialog := models.Dialog{
+		CallbackID:  "barista.dialog",
+		Title:       "Customize your drink",
+		SubmitLabel: "Order",
+		Elements:    elements,
+	}
+	return dialog
 }
