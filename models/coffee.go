@@ -1,19 +1,30 @@
 package models
 
-import "fmt"
-
-// DrinkSize is the drink size of a beverage
-type DrinkSize string
+// cupType is the drink size of a beverage
+type cupType string
 
 const (
-	drinkSize8oz     DrinkSize = "8 Oz"
-	drinkSize12oz    DrinkSize = "12 Oz"
-	drinkSizeDefault DrinkSize = "regular"
+	cupTypeGibraltar cupType = "Gibraltar Glass"
+	cupSize6oz       cupType = "6oz cup"
+	cupSize8oz       cupType = "8oz cup"
+	cupSize12oz      cupType = "12oz mug"
+	cupSize8ozPaper  cupType = "8oz paper"
+	cupSize12ozPaper cupType = "12oz paper"
+	cupSizePint      cupType = "Pint glass"
+	cupSizeDefault   cupType = "regular"
 )
 
 // AllDrinkSizes a list of all possible DrinkSize
 func AllDrinkSizes() []string {
-	return []string{"8 Oz", "12 Oz", "regular"}
+	cups := []cupType{cupTypeGibraltar, cupSize6oz,
+		cupSize8oz, cupSize12oz, cupSize8ozPaper,
+		cupSize12ozPaper, cupSizePint, cupSizeDefault}
+
+	result := make([]string, len(cups))
+	for idx, cup := range cups {
+		result[idx] = string(cup)
+	}
+	return result
 }
 
 // Temperture of the beverage
@@ -28,6 +39,8 @@ const (
 type EspressoOption string
 
 const (
+	// EspressoNone for none
+	EspressoNone EspressoOption = "None"
 	// EspressoSingle single shot
 	EspressoSingle EspressoOption = "single"
 	// EspressoDouble double shot
@@ -51,6 +64,8 @@ func AllEspressoOptions() []string {
 type Syrup string
 
 const (
+	// SyrupNone for no Syrup
+	SyrupNone Syrup = ""
 	//Mint Syrup
 	Mint Syrup = "Mint"
 	//Lavender Syrup
@@ -74,31 +89,41 @@ type Beverage struct {
 	Espresso   string
 	Syrup      string
 	Temperture string
+	CupType    string
 	Comment    string
 }
 
+func newBev() Beverage {
+	bev := Beverage{}
+	bev.CupType = string(cupSizeDefault)
+	bev.Temperture = string(tempHot)
+	return bev
+}
+
+func newBeverage(name string, espresso EspressoOption, syrup Syrup) Beverage {
+	return Beverage{
+		Name:       name,
+		Espresso:   string(espresso),
+		Syrup:      string(syrup),
+		Temperture: string(tempHot),
+	}
+}
+
 func beverageList() []Beverage {
+	espresso := newBeverage("Espresso", EspressoSingle, SyrupNone)
+	espresso.CupType = string(cupSize8oz)
+
 	return []Beverage{
-		Beverage{
-			Name:       "Vitality Latte",
-			Temperture: string(tempHot),
-			Syrup:      string(Honey),
-		},
-		Beverage{
-			Name:       "Espresso",
-			Espresso:   string(EspressoDouble),
-			Temperture: string(tempHot),
-		},
+		newBeverage("Vitality Latte", EspressoNone, Honey),
+		espresso,
 	}
 }
 
 // BeverageByName gets you a preset beverage or an empty one if not found
 func BeverageByName(name string) Beverage {
 	list := beverageList()
-	fmt.Printf("\nsearching for %s in list %v ", name, list)
 	for _, bev := range list {
 		if bev.Name == name {
-			fmt.Printf("\nfound %v ", bev)
 			return bev
 		}
 	}
