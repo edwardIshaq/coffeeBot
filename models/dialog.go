@@ -1,5 +1,7 @@
 package models
 
+import "github.com/nlopes/slack"
+
 // Dialog as in Slack dialogs
 // 	https://api.slack.com/dialogs#option_element_attributes#top-level_dialog_attributes
 type Dialog struct {
@@ -39,4 +41,18 @@ func DialogTitle(title string) string {
 		return title
 	}
 	return title[:21] + "..."
+}
+
+// DialogSubmitCallback to parse the response back from the Dialog
+type DialogSubmitCallback struct {
+	Type       string            `json:"type"`
+	Submission map[string]string `json:"submission"`
+	CallbackID string            `json:"callback_id"`
+
+	Team        slack.Team    `json:"team"`
+	Channel     slack.Channel `json:"channel"`
+	User        slack.User    `json:"user"`
+	ActionTs    string        `json:"action_ts"`
+	Token       string        `json:"token"`
+	ResponseURL string        `json:"response_url"`
 }

@@ -74,7 +74,6 @@ func (installer *appInstaller) buttonTemplate() string {
 	return button
 }
 
-// code=75950428352.351913834208.ab4422d8cec8e7b134b8dbe7659e097cecb294122cfebee8456cad92f03d1732&state=
 func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
 	//use `code` to get `OAuthResponse` response back

@@ -22,6 +22,7 @@ TODO:
 import (
 	"SlackPlatform/controller"
 	"SlackPlatform/models"
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
@@ -210,10 +211,30 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 
 	case "barista.dialog":
 		fmt.Println("interacted with `dialog`")
-		fmt.Println(actionCallback)
 		payload := r.PostFormValue("payload")
-		fmt.Println(payload)
+		dialogResponse := models.DialogSubmitCallback{}
+		json.Unmarshal([]byte(payload), &dialogResponse)
 
+		message := fmt.Sprintf("%v", dialogResponse.Submission)
+
+		params := &slack.Msg{
+			Text:            message,
+			ReplaceOriginal: true,
+			Timestamp:       dialogResponse.ActionTs,
+		}
+		data, _ := json.Marshal(params)
+		bodyReader := bytes.NewReader(data)
+		req, err := http.NewRequest(http.MethodPost, dialogResponse.ResponseURL, bodyReader)
+		fmt.Println("Request\n", req)
+
+		//Fire the request
+		resp, err := slack.HTTPClient.Do(req)
+		if err != nil {
+			fmt.Println("\nResponseError: ", err)
+			return
+		}
+		defer resp.Body.Close()
+		fmt.Printf("RESPONSE: %v", resp)
 	}
 }
 
