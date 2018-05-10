@@ -111,23 +111,22 @@ func newBev() Beverage {
 	return bev
 }
 
-func newBeverage(name string, espresso espressoOption, syrup syrup) Beverage {
+func newBeverage(name string, espresso espressoOption, syrup syrup, cup cupType) Beverage {
 	return Beverage{
 		Name:       name,
 		Espresso:   string(espresso),
 		Syrup:      string(syrup),
 		Temperture: string(tempHot),
-		CupType:    string(cupSize12oz),
+		CupType:    string(cup),
 	}
 }
 
 func beverageList() []Beverage {
-	espresso := newBeverage("Espresso", espressoSingle, syrupChocolate)
-	espresso.CupType = string(cupSize8oz)
+	espresso := newBeverage("Espresso", espressoSingle, syrupChocolate, cupSize8oz)
 
 	return []Beverage{
-		newBeverage("Vitality Latte", espressoQuad, syrupHoney),
 		espresso,
+		newBeverage("Vitality Latte", espressoQuad, syrupHoney, cupSize8oz),
 	}
 }
 
@@ -139,10 +138,36 @@ func BeverageByName(name string) Beverage {
 			return bev
 		}
 	}
-	// return Beverage{Name: name}
-	return demoBevMatch(name)
+	return defaultBeverage(name)
 }
 
-func demoBevMatch(name string) Beverage {
-	return beverageList()[0]
+func defaultBeverage(name string) Beverage {
+	return Beverage{
+		Espresso:   string(espressoSingle),
+		Syrup:      string(syrupMint),
+		Temperture: string(tempHot),
+		CupType:    string(cupSize8oz),
+	}
+}
+
+// Drink Menus
+
+// AllDrinksOfTheWeek list
+func AllDrinksOfTheWeek() []string {
+	return []string{"Vitality Latte", "Herbal Remedy Tea", "Iced Separator"}
+}
+
+// AllUsualDrinks list
+func AllUsualDrinks() []string {
+	return []string{"Steamed Milk", "Hot Chocolate", "Tea"}
+}
+
+// AllTeas list
+func AllTeas() []string {
+	return []string{"London Fog", "San-Fran Fog", "Matcha Latte", "Tanglewood Ginger Chai"}
+}
+
+// AllCoffees list
+func AllCoffees() []string {
+	return []string{"Espresso", "Macchiato", "Gibraltar / Cortado", "Cappuccino"}
 }

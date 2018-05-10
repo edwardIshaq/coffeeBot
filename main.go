@@ -145,25 +145,25 @@ func sendMenu(triggerID, channelID string) {
 	// Coffees
 	coffeeGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Coffee",
-		Options: models.MakeAttachmentOptions([]string{"Espresso", "Macchiato", "Gibraltar / Cortado", "Cappuccino"}),
+		Options: models.MakeAttachmentOptions(models.AllCoffees()),
 	}
 
 	//drinkOfTheWeekGroup
 	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Drink of the Week",
-		Options: models.MakeAttachmentOptions([]string{"Vitality Latte", "Herbal Remedy Tea", "Iced Separator"}),
+		Options: models.MakeAttachmentOptions(models.AllDrinksOfTheWeek()),
 	}
 
 	// Regular Drinks Menu
 	regularDrinksGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Usual Drinks",
-		Options: models.MakeAttachmentOptions([]string{"Steamed Milk", "Hot Chocolate", "Tea"}),
+		Options: models.MakeAttachmentOptions(models.AllUsualDrinks()),
 	}
 
 	// Tea
 	teaDrinksGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Tea",
-		Options: models.MakeAttachmentOptions([]string{"London Fog", "San-Fran Fog", "Matcha Latte", "Tanglewood Ginger Chai"}),
+		Options: models.MakeAttachmentOptions(models.AllTeas()),
 	}
 
 	menuAction := slack.AttachmentAction{
