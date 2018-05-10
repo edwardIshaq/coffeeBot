@@ -29,6 +29,24 @@ type appInstaller struct {
 	verificationToken string
 }
 
+// Team is the slack representation of Workspace
+type Team struct {
+	TeamID      uint
+	SlackTeamID string
+	Name        string
+	UserID      string
+}
+
+// NewTeam inflating a team with OAuthResponse
+func NewTeam(oauth *slack.OAuthResponse) *Team {
+	team := &Team{
+		SlackTeamID: oauth.TeamID,
+		Name:        oauth.TeamName,
+		UserID:      oauth.UserID,
+	}
+	return team
+}
+
 /*
 Handler for the install button
 */
@@ -62,9 +80,14 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 	//use `code` to get `OAuthResponse` response back
 	oauthResponse, err := slack.GetOAuthResponseContext(context.Background(), installer.slackClientID, installer.slackClientSecret, code, installer.redirectURL(), false)
 
+	fmt.Println()
+	fmt.Printf("%v", oauthResponse)
+	fmt.Println()
 	message := "Something wrong happened"
 	if err == nil {
 		installer.OAuthResponse = *oauthResponse
+		team := NewTeam(oauthResponse)
+		fmt.Printf("%v", team)
 		dbClient.SaveToDB(installer)
 
 		message = ""

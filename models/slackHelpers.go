@@ -1,8 +1,6 @@
 package models
 
 import (
-	"encoding/json"
-
 	"github.com/nlopes/slack"
 )
 
@@ -34,21 +32,4 @@ type action struct {
 
 type optionValue struct {
 	Value string `json:"value"`
-}
-
-// GetSelectedOption digs into the message menu response and gets the selected option
-func GetSelectedOption(data []byte) (selectedOption, triggerID string) {
-	var parsedResponse menuResponse
-	selectedOption = ""
-	triggerID = ""
-	if err := json.Unmarshal(data, &parsedResponse); err != nil {
-		return
-	}
-
-	triggerID = parsedResponse.TriggerID
-	if len(parsedResponse.Actions) > 0 &&
-		len(parsedResponse.Actions[0].SelectedOptions) > 0 {
-		selectedOption = parsedResponse.Actions[0].SelectedOptions[0].Value
-	}
-	return
 }

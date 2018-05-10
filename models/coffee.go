@@ -16,15 +16,16 @@ const (
 
 // AllDrinkSizes a list of all possible DrinkSize
 func AllDrinkSizes() []string {
-	cups := []cupType{cupTypeGibraltar, cupSize6oz,
-		cupSize8oz, cupSize12oz, cupSize8ozPaper,
-		cupSize12ozPaper, cupSizePint, cupSizeDefault}
-
-	result := make([]string, len(cups))
-	for idx, cup := range cups {
-		result[idx] = string(cup)
+	return []string{
+		string(cupTypeGibraltar),
+		string(cupSize6oz),
+		string(cupSize8oz),
+		string(cupSize12oz),
+		string(cupSize8ozPaper),
+		string(cupSize12ozPaper),
+		string(cupSizePint),
+		string(cupSizeDefault),
 	}
-	return result
 }
 
 // Temperture of the beverage
@@ -35,52 +36,62 @@ const (
 	tempIced Temperture = "iced"
 )
 
-// EspressoOption to captuer the espresso shots in a beverage
-type EspressoOption string
+// AllTemps all temps
+func AllTemps() []string {
+	return []string{
+		string(tempHot),
+		string(tempIced),
+	}
+}
+
+// espressoOption to captuer the espresso shots in a beverage
+type espressoOption string
 
 const (
-	// EspressoNone for none
-	EspressoNone EspressoOption = "None"
-	// EspressoSingle single shot
-	EspressoSingle EspressoOption = "single"
-	// EspressoDouble double shot
-	EspressoDouble EspressoOption = "double"
-	// EspressoTripple triple shot
-	EspressoTripple EspressoOption = "triple"
-	// EspressoQuad quat shot
-	EspressoQuad EspressoOption = "quad"
-	// EspressoDecaf decaf
-	EspressoDecaf EspressoOption = "decaf"
-	// EspressoHalfCaf half-caf
-	EspressoHalfCaf EspressoOption = "Half-caf"
+	espressoNone    espressoOption = "None"
+	espressoSingle  espressoOption = "single"
+	espressoDouble  espressoOption = "double"
+	espressoTripple espressoOption = "triple"
+	espressoQuad    espressoOption = "quad"
+	espressoDecaf   espressoOption = "decaf"
+	espressoHalfCaf espressoOption = "Half-caf"
 )
 
 // AllEspressoOptions a list of all possible DrinkSize
 func AllEspressoOptions() []string {
-	return []string{"single", "double", "triple", "quad", "decaf", "Half-caf"}
+	return []string{
+		string(espressoNone),
+		string(espressoSingle),
+		string(espressoDouble),
+		string(espressoTripple),
+		string(espressoQuad),
+		string(espressoDecaf),
+		string(espressoHalfCaf),
+	}
 }
 
-// Syrup place holder type
-type Syrup string
+// syrup place holder type
+type syrup string
 
 const (
-	// SyrupNone for no Syrup
-	SyrupNone Syrup = ""
-	//Mint Syrup
-	Mint Syrup = "Mint"
-	//Lavender Syrup
-	Lavender Syrup = "Lavender"
-	//Chocolate Syrup
-	Chocolate Syrup = "Chocolate"
-	//Vanilla Syrup
-	Vanilla Syrup = "Vanilla"
-	//Honey Syrup
-	Honey Syrup = "Honey"
+	syrupNone      syrup = "No Syrup"
+	syrupMint      syrup = "Mint"
+	syrupLavender  syrup = "Lavender"
+	syrupChocolate syrup = "Chocolate"
+	syrupVanilla   syrup = "Vanilla"
+	syrupHoney     syrup = "Honey"
 )
 
 // AllSyrupOptions a list of all the Syrup options
 func AllSyrupOptions() []string {
-	return []string{"Mint", "Lavender", "Chocolate", "Vanilla", "Honey"}
+	return []string{
+		string(syrupNone),
+		string(syrupMint),
+		string(syrupLavender),
+		string(syrupChocolate),
+		string(syrupVanilla),
+		string(syrupHoney),
+	}
 }
 
 // Beverage type will hold the default selections for the menus
@@ -100,21 +111,22 @@ func newBev() Beverage {
 	return bev
 }
 
-func newBeverage(name string, espresso EspressoOption, syrup Syrup) Beverage {
+func newBeverage(name string, espresso espressoOption, syrup syrup) Beverage {
 	return Beverage{
 		Name:       name,
 		Espresso:   string(espresso),
 		Syrup:      string(syrup),
 		Temperture: string(tempHot),
+		CupType:    string(cupSize12oz),
 	}
 }
 
 func beverageList() []Beverage {
-	espresso := newBeverage("Espresso", EspressoSingle, SyrupNone)
+	espresso := newBeverage("Espresso", espressoSingle, syrupChocolate)
 	espresso.CupType = string(cupSize8oz)
 
 	return []Beverage{
-		newBeverage("Vitality Latte", EspressoNone, Honey),
+		newBeverage("Vitality Latte", espressoQuad, syrupHoney),
 		espresso,
 	}
 }
@@ -127,5 +139,10 @@ func BeverageByName(name string) Beverage {
 			return bev
 		}
 	}
-	return Beverage{Name: name}
+	// return Beverage{Name: name}
+	return demoBevMatch(name)
+}
+
+func demoBevMatch(name string) Beverage {
+	return beverageList()[0]
 }

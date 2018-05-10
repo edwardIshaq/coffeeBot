@@ -136,7 +136,7 @@ func handleCoffeeCommand(w http.ResponseWriter, r *http.Request) {
 func sendMenu(triggerID, channelID string) {
 	attachment := slack.Attachment{}
 	attachment.Text = "Choose a beverage"
-	attachment.Fallback = "hmmmm, something wrong"
+	attachment.Fallback = "Choose a beverage from the menu"
 	attachment.Color = "#3AA3E3"
 	attachment.CallbackID = "beverage_selection"
 
@@ -180,23 +180,50 @@ func sendMenu(triggerID, channelID string) {
 	postParams.Attachments = []slack.Attachment{attachment}
 	postParams.Channel = channelID
 
-	fmt.Print(postParams)
 	api.PostMessage(channelID, "choose a beverage", postParams)
 }
 
-func readFile(filePath string) (content string, err error) {
-	data, err := ioutil.ReadFile(filePath)
-	content = string(data)
-	return
+func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallback {
+	r.ParseForm()
+	payload := r.PostFormValue("payload")
+	actionCallback := slack.AttachmentActionCallback{}
+	json.Unmarshal([]byte(payload), &actionCallback)
+	return actionCallback
 }
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
-	payloadString := r.PostFormValue("payload")
-	chosenBeverage, triggerID := models.GetSelectedOption([]byte(payloadString))
+	actionCallback := parseAttachmentActionCallback(r)
+	fmt.Println()
 
+	switch actionCallback.CallbackID {
+	case "beverage_selection":
+		fmt.Println("interacted with `menu`")
+		if len(actionCallback.Actions) >= 1 {
+			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
+				chosenBeverage := actionCallback.Actions[0].SelectedOptions[0].Value
+				fmt.Printf("You selected %v", chosenBeverage)
+				fmt.Printf("triggerID: %v", actionCallback.TriggerID)
+				postDialog(chosenBeverage, actionCallback.TriggerID)
+			}
+		}
+		return
+
+	case "barista.dialog":
+		fmt.Println("interacted with `dialog`")
+		fmt.Println(actionCallback)
+		payload := r.PostFormValue("payload")
+		fmt.Println(payload)
+
+	}
+}
+
+func postDialog(chosenBeverage, triggerID string) {
 	dialog := makeDialog(chosenBeverage)
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {
+		fmt.Println()
+		fmt.Println(string(dialogjson))
+		fmt.Println()
 
 		postBody := url.Values{
 			"token":      {"xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"},
@@ -234,29 +261,33 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type payload struct {
-	TriggerID string `json:"trigger_id"`
-}
-
 func makeDialog(chosenBeverage string) models.Dialog {
 	presetBeverage := models.BeverageByName(chosenBeverage)
 
-	espressMenu := models.NewStaticSelectDialogInput("espresso", "Espresso Options", models.AllEspressoOptions())
+	cupMenu := models.NewStaticSelectDialogInput("CupType", "Drink Size", models.AllDrinkSizes())
+	cupMenu.Value = presetBeverage.CupType
+
+	espressMenu := models.NewStaticSelectDialogInput("Espresso", "Espresso Options", models.AllEspressoOptions())
 	espressMenu.Value = presetBeverage.Espresso
 
-	syrupMenu := models.NewStaticSelectDialogInput("syrup", "Syrup", models.AllSyrupOptions())
+	syrupMenu := models.NewStaticSelectDialogInput("Syrup", "Syrup", models.AllSyrupOptions())
 	syrupMenu.Value = presetBeverage.Syrup
+
+	tempMenu := models.NewStaticSelectDialogInput("Temperture", "Temperture", models.AllTemps())
+	tempMenu.Value = presetBeverage.Temperture
+
+	commentInput := models.NewTextAreaInput("Comment", "Comments")
 
 	dialog := models.Dialog{
 		CallbackID:  "barista.dialog",
 		Title:       models.DialogTitle(chosenBeverage),
 		SubmitLabel: "Order",
 		Elements: []interface{}{
-			models.NewStaticSelectDialogInput("drinkSize", "Drink Size", models.AllDrinkSizes()),
+			cupMenu,
 			espressMenu,
 			syrupMenu,
-			models.NewStaticSelectDialogInput("floor", "Pickup", []string{"3rd Floor", "5th Floor"}),
-			models.NewStaticSelectDialogInput("temperture", "Temperture", []string{"Hot", "Iced"}),
+			tempMenu,
+			commentInput,
 		},
 	}
 	return dialog
