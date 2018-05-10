@@ -33,6 +33,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/nlopes/slack"
@@ -195,8 +196,14 @@ func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallba
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	actionCallback := parseAttachmentActionCallback(r)
 	fmt.Println()
+	callbackID := actionCallback.CallbackID
+	chosenBev := ""
+	if strings.HasPrefix(actionCallback.CallbackID, "barista.dialog.") {
+		callbackID = "barista.dialog"
+		chosenBev = strings.Split(actionCallback.CallbackID, ".")[2]
+	}
 
-	switch actionCallback.CallbackID {
+	switch callbackID {
 	case "beverage_selection":
 		fmt.Println("interacted with `menu`")
 		if len(actionCallback.Actions) >= 1 {
@@ -210,31 +217,32 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 		return
 
 	case "barista.dialog":
-		fmt.Println("interacted with `dialog`")
-		payload := r.PostFormValue("payload")
+		startTime := time.Now()
 		dialogResponse := models.DialogSubmitCallback{}
-		json.Unmarshal([]byte(payload), &dialogResponse)
-
-		message := fmt.Sprintf("%v", dialogResponse.Submission)
-
+		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
+		responseURL := dialogResponse.ResponseURL
 		params := &slack.Msg{
-			Text:            message,
+			Text:            fmt.Sprintf("%s: %v", chosenBev, dialogResponse.Submission),
 			ReplaceOriginal: true,
 			Timestamp:       dialogResponse.ActionTs,
 		}
-		data, _ := json.Marshal(params)
-		bodyReader := bytes.NewReader(data)
-		req, err := http.NewRequest(http.MethodPost, dialogResponse.ResponseURL, bodyReader)
-		fmt.Println("Request\n", req)
 
-		//Fire the request
-		resp, err := slack.HTTPClient.Do(req)
-		if err != nil {
-			fmt.Println("\nResponseError: ", err)
-			return
-		}
-		defer resp.Body.Close()
-		fmt.Printf("RESPONSE: %v", resp)
+		go func(params *slack.Msg, responseURL string) {
+			data, _ := json.Marshal(params)
+			bodyReader := bytes.NewReader(data)
+			req, err := http.NewRequest(http.MethodPost, responseURL, bodyReader)
+			fmt.Println("Request\n", req)
+
+			//Fire the request
+			resp, err := slack.HTTPClient.Do(req)
+			if err != nil {
+				fmt.Println("\nResponseError: ", err)
+				return
+			}
+			defer resp.Body.Close()
+			fmt.Printf("RESPONSE: %v", resp)
+			fmt.Printf("\nprocessing Dialog took: %s\n", time.Since(startTime))
+		}(params, responseURL)
 	}
 }
 
@@ -242,10 +250,6 @@ func postDialog(chosenBeverage, triggerID string) {
 	dialog := makeDialog(chosenBeverage)
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {
-		fmt.Println()
-		fmt.Println(string(dialogjson))
-		fmt.Println()
-
 		postBody := url.Values{
 			"token":      {"xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"},
 			"trigger_id": {triggerID},
@@ -298,9 +302,12 @@ func makeDialog(chosenBeverage string) models.Dialog {
 	tempMenu.Value = presetBeverage.Temperture
 
 	commentInput := models.NewTextAreaInput("Comment", "Comments")
+	commentInput.Optional = true
+
+	callbackID := "barista.dialog." + chosenBeverage
 
 	dialog := models.Dialog{
-		CallbackID:  "barista.dialog",
+		CallbackID:  callbackID,
 		Title:       models.DialogTitle(chosenBeverage),
 		SubmitLabel: "Order",
 		Elements: []interface{}{
