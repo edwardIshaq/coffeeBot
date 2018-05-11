@@ -27,7 +27,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	_ "github.com/lib/pq"
 	"github.com/nlopes/slack"
@@ -58,13 +57,11 @@ func main() {
 	db := connectToDatabase()
 	defer db.Close()
 	models.SetDatabase(db)
-	//models.DemoDB()
 
 	dbWrapper := models.NewDBWrapper(db)
 	controller.StartupControllers(dbWrapper, api)
 
 	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
-	http.HandleFunc("/", sayHello)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
@@ -78,15 +75,6 @@ func connectToDatabase() *sql.DB {
 		log.Fatal(err)
 	}
 	return db
-}
-
-func sayHello(w http.ResponseWriter, r *http.Request) {
-	message := r.URL.Path
-	message = strings.TrimPrefix(message, "/")
-	message = "Hello " + message
-	message += " " + r.Method
-	message += "\nBody:" + fmt.Sprintf("%s", r.Body)
-	w.Write([]byte(message))
 }
 
 //------------------------------------------

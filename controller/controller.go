@@ -42,4 +42,6 @@ func StartupControllers(dbWrapper *models.DBWrapper, slackAPI *slack.Client) {
 
 	interact := interactive{}
 	interact.registerRoutes()
+
+	registerHelloRoute()
 }
