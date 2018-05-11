@@ -11,6 +11,7 @@ var (
 	installer      *appInstaller
 	dbClient       crossfunction.DBClient
 	baristaCommand slashCommand
+	interact       interactive
 )
 
 //To be passed threw the `StartupControllers`
@@ -38,4 +39,7 @@ func StartupControllers(dbWrapper *models.DBWrapper, slackAPI *slack.Client) {
 		api:  slackAPI,
 	}
 	baristaCommand.registerRoutes()
+
+	interact := interactive{}
+	interact.registerRoutes()
 }

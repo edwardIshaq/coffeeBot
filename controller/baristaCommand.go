@@ -16,6 +16,7 @@ type slashCommand struct {
 func (s *slashCommand) registerRoutes() {
 	fmt.Printf("registering : %v", s.route())
 	http.HandleFunc(s.route(), func(w http.ResponseWriter, r *http.Request) {
+		//TODO: func WithValue(parent Context, key, val interface{}) Context
 		s.handleCoffeeCommand(w, r)
 	})
 }
