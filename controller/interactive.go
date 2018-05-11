@@ -153,3 +153,9 @@ func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallba
 	json.Unmarshal([]byte(payload), &actionCallback)
 	return actionCallback
 }
+
+func textReply(w http.ResponseWriter, text string) {
+	w.Header().Set("Content-Type", "application/json")
+	message := fmt.Sprintf(`{"text" : "%s", "replace_original": false}`, text)
+	w.Write([]byte(message))
+}

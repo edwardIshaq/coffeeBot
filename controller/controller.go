@@ -24,6 +24,10 @@ const (
 
 // StartupControllers call this function to setup the controllers
 func StartupControllers(dbWrapper *models.DBWrapper, slackAPI *slack.Client) {
+	//Demo routes
+	registerHelloRoute()
+	registerOutgoingHookRoute()
+
 	dbClient = dbWrapper
 
 	installer := &appInstaller{
@@ -42,6 +46,4 @@ func StartupControllers(dbWrapper *models.DBWrapper, slackAPI *slack.Client) {
 
 	interact := interactive{}
 	interact.registerRoutes()
-
-	registerHelloRoute()
 }

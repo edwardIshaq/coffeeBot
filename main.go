@@ -26,7 +26,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
 	_ "github.com/lib/pq"
 	"github.com/nlopes/slack"
@@ -61,8 +60,6 @@ func main() {
 	dbWrapper := models.NewDBWrapper(db)
 	controller.StartupControllers(dbWrapper, api)
 
-	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
-
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
 	}
@@ -77,17 +74,3 @@ func connectToDatabase() *sql.DB {
 	return db
 }
 
-//------------------------------------------
-//Slack outgoing hooks demo
-func handleOutgoingHooks(w http.ResponseWriter, r *http.Request) {
-	text := r.PostFormValue("text")
-	value, _ := strconv.ParseInt(text, 10, 32)
-	message := fmt.Sprintf(`{"text" : "%d"}`, value+1)
-	w.Write([]byte(message))
-}
-
-func textReply(w http.ResponseWriter, text string) {
-	w.Header().Set("Content-Type", "application/json")
-	message := fmt.Sprintf(`{"text" : "%s", "replace_original": false}`, text)
-	w.Write([]byte(message))
-}
