@@ -1,6 +1,8 @@
 package models
 
-import "github.com/nlopes/slack"
+import (
+	"github.com/nlopes/slack"
+)
 
 // Dialog as in Slack dialogs
 // 	https://api.slack.com/dialogs#option_element_attributes#top-level_dialog_attributes
@@ -55,4 +57,41 @@ type DialogSubmitCallback struct {
 	ActionTs    string        `json:"action_ts"`
 	Token       string        `json:"token"`
 	ResponseURL string        `json:"response_url"`
+}
+
+// FeedbackMessage reply to dialog with an attachment message
+func (d DialogSubmitCallback) FeedbackMessage(chosenBev string) *slack.Msg {
+	fields := []slack.AttachmentField{}
+	for key, value := range d.Submission {
+		fields = append(fields,
+			slack.AttachmentField{
+				Title: key,
+				Value: value,
+			},
+		)
+	}
+
+	params := &slack.Msg{
+		Timestamp: d.ActionTs,
+		Attachments: []slack.Attachment{
+			slack.Attachment{
+				Text:   chosenBev,
+				Color:  "#eaca67",
+				Fields: fields,
+			},
+			slack.Attachment{
+				Text:       "Would you like to Save your Order for next time?",
+				CallbackID: "saveOrder",
+				Actions: []slack.AttachmentAction{
+					slack.AttachmentAction{
+						Type:  "button",
+						Name:  "Save",
+						Text:  "Save",
+						Value: "Save",
+					},
+				},
+			},
+		},
+	}
+	return params
 }

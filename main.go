@@ -206,6 +206,7 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	switch callbackID {
 	case "beverage_selection":
 		fmt.Println("interacted with `menu`")
+		//textReply(w, "Customize your order")
 		if len(actionCallback.Actions) >= 1 {
 			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
 				chosenBeverage := actionCallback.Actions[0].SelectedOptions[0].Value
@@ -221,11 +222,7 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 		dialogResponse := models.DialogSubmitCallback{}
 		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
 		responseURL := dialogResponse.ResponseURL
-		params := &slack.Msg{
-			Text:            fmt.Sprintf("%s: %v", chosenBev, dialogResponse.Submission),
-			ReplaceOriginal: true,
-			Timestamp:       dialogResponse.ActionTs,
-		}
+		params := dialogResponse.FeedbackMessage(chosenBev)
 
 		go func(params *slack.Msg, responseURL string) {
 			data, _ := json.Marshal(params)
@@ -244,6 +241,12 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("\nprocessing Dialog took: %s\n", time.Since(startTime))
 		}(params, responseURL)
 	}
+}
+
+func textReply(w http.ResponseWriter, text string) {
+	w.Header().Set("Content-Type", "application/json")
+	message := fmt.Sprintf(`{"text" : "%s", "replace_original": false}`, text)
+	w.Write([]byte(message))
 }
 
 func postDialog(chosenBeverage, triggerID string) {
