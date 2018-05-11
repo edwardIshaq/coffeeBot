@@ -67,10 +67,10 @@ func main() {
 	//models.DemoDB()
 
 	dbWrapper := models.NewDBWrapper(db)
-	controller.StartupControllers(dbWrapper)
+	controller.StartupControllers(dbWrapper, api)
 
 	http.HandleFunc("/outgoingHooks", handleOutgoingHooks)
-	http.HandleFunc("/coffeeCommand", handleCoffeeCommand)
+	// http.HandleFunc("/coffeeCommand", handleCoffeeCommand)
 	http.HandleFunc("/interactive", handleInteractiveMessages)
 	http.HandleFunc("/", sayHello)
 
@@ -86,28 +86,6 @@ func connectToDatabase() *sql.DB {
 		log.Fatal(err)
 	}
 	return db
-}
-
-/*
-Testing the api
-*/
-func getGroups(api *slack.Client) {
-	// If you set debugging, it will log all requests to the console
-	// Useful when encountering issues
-	// api.SetDebug(true)
-	groups, err := api.GetGroups(false)
-	if err != nil {
-		fmt.Printf("%s\n", err)
-		return
-	}
-
-	for _, group := range groups {
-		var isPrivate = "public-group"
-		if group.IsPrivate {
-			isPrivate = "Private"
-		}
-		fmt.Printf("ID: %s \t Name: %s \tPrivate: %s\n", group.ID, group.Name, isPrivate)
-	}
 }
 
 func sayHello(w http.ResponseWriter, r *http.Request) {
@@ -126,63 +104,6 @@ func handleOutgoingHooks(w http.ResponseWriter, r *http.Request) {
 	value, _ := strconv.ParseInt(text, 10, 32)
 	message := fmt.Sprintf(`{"text" : "%d"}`, value+1)
 	w.Write([]byte(message))
-}
-
-func handleCoffeeCommand(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	triggerID := r.PostFormValue("trigger_id")
-	channelID := r.PostFormValue("channel_id")
-	sendMenu(triggerID, channelID)
-}
-
-func sendMenu(triggerID, channelID string) {
-	attachment := slack.Attachment{}
-	attachment.Text = "Choose a beverage"
-	attachment.Fallback = "Choose a beverage from the menu"
-	attachment.Color = "#3AA3E3"
-	attachment.CallbackID = "beverage_selection"
-
-	// Coffees
-	coffeeGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Coffee",
-		Options: models.MakeAttachmentOptions(models.AllCoffees()),
-	}
-
-	//drinkOfTheWeekGroup
-	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Drink of the Week",
-		Options: models.MakeAttachmentOptions(models.AllDrinksOfTheWeek()),
-	}
-
-	// Regular Drinks Menu
-	regularDrinksGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Usual Drinks",
-		Options: models.MakeAttachmentOptions(models.AllUsualDrinks()),
-	}
-
-	// Tea
-	teaDrinksGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Tea",
-		Options: models.MakeAttachmentOptions(models.AllTeas()),
-	}
-
-	menuAction := slack.AttachmentAction{
-		Name:         "beverage_menu",
-		Text:         "Select beverage",
-		Type:         "select",
-		OptionGroups: []slack.AttachmentActionOptionGroup{coffeeGroup, regularDrinksGroup, teaDrinksGroup, drinkOfTheWeekGroup},
-	}
-
-	attachment.Actions = []slack.AttachmentAction{menuAction}
-	message := slack.Message{}
-	message.Text = "What would you like to order ?"
-	message.Attachments = []slack.Attachment{attachment}
-
-	postParams := slack.NewPostMessageParameters()
-	postParams.Attachments = []slack.Attachment{attachment}
-	postParams.Channel = channelID
-
-	api.PostMessage(channelID, "choose a beverage", postParams)
 }
 
 func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallback {

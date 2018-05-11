@@ -3,11 +3,14 @@ package controller
 import (
 	"SlackPlatform/crossfunction"
 	"SlackPlatform/models"
+
+	"github.com/nlopes/slack"
 )
 
 var (
-	installer *appInstaller
-	dbClient  crossfunction.DBClient
+	installer      *appInstaller
+	dbClient       crossfunction.DBClient
+	baristaCommand slashCommand
 )
 
 //To be passed threw the `StartupControllers`
@@ -19,14 +22,20 @@ const (
 )
 
 // StartupControllers call this function to setup the controllers
-func StartupControllers(dbWrapper *models.DBWrapper) {
+func StartupControllers(dbWrapper *models.DBWrapper, slackAPI *slack.Client) {
+	dbClient = dbWrapper
+
 	installer := &appInstaller{
 		appURL:            appURL,
 		slackClientID:     slackClientID,
 		slackClientSecret: slackClientSecret,
 		verificationToken: verificationToken,
 	}
-
-	dbClient = dbWrapper
 	installer.registerRoutes()
+
+	baristaCommand := slashCommand{
+		name: "coffeeCommand",
+		api:  slackAPI,
+	}
+	baristaCommand.registerRoutes()
 }
