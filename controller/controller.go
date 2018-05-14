@@ -1,17 +1,16 @@
 package controller
 
 import (
-	"SlackPlatform/crossfunction"
-	"SlackPlatform/models"
-
+	"github.com/jinzhu/gorm"
 	"github.com/nlopes/slack"
 )
 
 var (
-	installer      *appInstaller
-	dbClient       crossfunction.DBClient
+	installer *appInstaller
+	// dbClient       crossfunction.DBClient
 	baristaCommand slashCommand
 	interact       interactive
+	db             *gorm.DB
 )
 
 //To be passed threw the `StartupControllers`
@@ -22,20 +21,22 @@ const (
 	verificationToken = "8ycguzKPPcWvt7wIsud0a9EL"
 )
 
-// StartupControllers call this function to setup the controllers
-func StartupControllers(dbWrapper *models.DBWrapper, slackAPI *slack.Client) {
-	//Demo routes
-	registerHelloRoute()
-	registerOutgoingHookRoute()
-
-	dbClient = dbWrapper
-
-	installer := &appInstaller{
+func init() {
+	installer = &appInstaller{
 		appURL:            appURL,
 		slackClientID:     slackClientID,
 		slackClientSecret: slackClientSecret,
 		verificationToken: verificationToken,
 	}
+}
+
+// StartupControllers call this function to setup the controllers
+func StartupControllers(gormDB *gorm.DB, slackAPI *slack.Client) {
+	db = gormDB
+	//Demo routes
+	registerHelloRoute()
+	registerOutgoingHookRoute()
+
 	installer.registerRoutes()
 
 	baristaCommand := slashCommand{

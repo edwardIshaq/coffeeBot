@@ -23,10 +23,10 @@ import (
 	"SlackPlatform/controller"
 	"SlackPlatform/models"
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 
+	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	"github.com/nlopes/slack"
 )
@@ -45,20 +45,19 @@ Needs to be stored in DB
 */
 const (
 	utaAppToken = "xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"
+	connStr     = "user=goUser dbname=barista password=qwe123 sslmode=disable"
 )
 
 var (
-	message = "Hello world"
-	api     = slack.New(utaAppToken)
+	api = slack.New(utaAppToken)
 )
 
 func main() {
-	db := connectToDatabase()
+	db := connectToGormDB()
 	defer db.Close()
-	models.SetDatabase(db)
 
-	dbWrapper := models.NewDBWrapper(db)
-	controller.StartupControllers(dbWrapper, api)
+	models.SetDatabase(db)
+	controller.StartupControllers(db, api)
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		panic(err)
@@ -66,7 +65,6 @@ func main() {
 }
 
 func connectToDatabase() *sql.DB {
-	connStr := "user=goUser dbname=barista password=qwe123 sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal(err)
@@ -74,3 +72,10 @@ func connectToDatabase() *sql.DB {
 	return db
 }
 
+func connectToGormDB() *gorm.DB {
+	db, err := gorm.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return db
+}

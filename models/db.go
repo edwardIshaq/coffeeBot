@@ -1,41 +1,18 @@
 package models
 
 import (
-	"database/sql"
-	"fmt"
+	"github.com/jinzhu/gorm"
 )
 
 // Private package varible, injected in by calling `SetDatabase`
-var db *sql.DB
+var db *gorm.DB
 
 // SetDatabase sets up the DB
-func SetDatabase(database *sql.DB) {
+func SetDatabase(database *gorm.DB) {
 	db = database
+	setupTables()
 }
 
-// DemoDB simple demo
-func DemoDB() {
-	println("we have db? :", db)
-	row := db.QueryRow(`SELECT team_id, access_token FROM team WHERE id = $1`, 1)
-	var teamID string
-	var accessToken string
-	row.Scan(&teamID, &accessToken)
-	fmt.Printf("accessToken: %s | team: %s", accessToken, teamID)
-}
-
-// DBWrapper will be a public interface for other sibling packages
-type DBWrapper struct {
-	db *sql.DB
-}
-
-// NewDBWrapper sets up a new DB
-func NewDBWrapper(db *sql.DB) *DBWrapper {
-	return &DBWrapper{
-		db: db,
-	}
-}
-
-// SaveToDB will serve as moc to save an object to db
-func (dbWrapper *DBWrapper) SaveToDB(value interface{}) {
-	fmt.Printf("DBWrapper: saving to DB: %v", dbWrapper)
+func setupTables() {
+	db.AutoMigrate(&Team{})
 }

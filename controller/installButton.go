@@ -10,10 +10,12 @@ Permissions update:
 
 */
 import (
+	"SlackPlatform/models"
 	"context"
 	"fmt"
 	"net/http"
 
+	// "github.com/jinzhu/gorm"
 	"github.com/nlopes/slack"
 )
 
@@ -27,24 +29,6 @@ type appInstaller struct {
 	slackClientID     string
 	slackClientSecret string
 	verificationToken string
-}
-
-// Team is the slack representation of Workspace
-type Team struct {
-	TeamID      uint
-	SlackTeamID string
-	Name        string
-	UserID      string
-}
-
-// NewTeam inflating a team with OAuthResponse
-func NewTeam(oauth *slack.OAuthResponse) *Team {
-	team := &Team{
-		SlackTeamID: oauth.TeamID,
-		Name:        oauth.TeamName,
-		UserID:      oauth.UserID,
-	}
-	return team
 }
 
 /*
@@ -80,14 +64,13 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 	oauthResponse, err := slack.GetOAuthResponseContext(context.Background(), installer.slackClientID, installer.slackClientSecret, code, installer.redirectURL(), false)
 
 	fmt.Println()
-	fmt.Printf("%v", oauthResponse)
+	fmt.Printf("oauthResponse: \n%v", oauthResponse)
 	fmt.Println()
 	message := "Something wrong happened"
 	if err == nil {
 		installer.OAuthResponse = *oauthResponse
-		team := NewTeam(oauthResponse)
+		team := models.NewTeam(oauthResponse)
 		fmt.Printf("%v", team)
-		dbClient.SaveToDB(installer)
 
 		message = ""
 		message += fmt.Sprintf("\nError?: %v", err)
