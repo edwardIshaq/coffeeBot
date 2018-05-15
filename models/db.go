@@ -15,4 +15,5 @@ func SetDatabase(database *gorm.DB) {
 
 func setupTables() {
 	db.AutoMigrate(&Team{})
+	db.AutoMigrate(&Beverage{})
 }

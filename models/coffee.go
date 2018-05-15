@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/jinzhu/gorm"
+)
+
 // cupType is the drink size of a beverage
 type cupType string
 
@@ -96,12 +100,15 @@ func AllSyrupOptions() []string {
 
 // Beverage type will hold the default selections for the menus
 type Beverage struct {
-	Name       string
-	Espresso   string
-	Syrup      string
-	Temperture string
-	CupType    string
-	Comment    string
+	gorm.Model
+	Name            string
+	Espresso        string
+	Syrup           string
+	Temperture      string
+	CupType         string
+	DrinkOfTheWeek  bool
+	BaristaApproved bool
+	Comment         string
 }
 
 func newBev() Beverage {
@@ -122,7 +129,7 @@ func newBeverage(name string, espresso espressoOption, syrup syrup, cup cupType)
 }
 
 func beverageList() []Beverage {
-	espresso := newBeverage("Espresso", espressoSingle, syrupChocolate, cupSize8oz)
+	espresso := newBeverage("Espresso", espressoSingle, syrupNone, cupSize8oz)
 
 	return []Beverage{
 		espresso,
