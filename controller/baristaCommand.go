@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SlackPlatform/crossfunction"
 	"SlackPlatform/models"
 	"net/http"
 
@@ -14,7 +15,11 @@ type slashCommand struct {
 
 func (s *slashCommand) registerRoutes() {
 	http.HandleFunc(s.route(), func(w http.ResponseWriter, r *http.Request) {
-		//TODO: func WithValue(parent Context, key, val interface{}) Context
+		if err := r.ParseForm(); err != nil {
+			http.NotFoundHandler().ServeHTTP(w, r)
+			return
+		}
+		s.api = crossfunction.ClientForRequest(r)
 		s.handleCoffeeCommand(w, r)
 	})
 }
