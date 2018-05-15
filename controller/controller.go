@@ -6,8 +6,7 @@ import (
 )
 
 var (
-	installer *appInstaller
-	// dbClient       crossfunction.DBClient
+	installer      *appInstaller
 	baristaCommand slashCommand
 	interact       interactive
 	db             *gorm.DB
@@ -22,12 +21,7 @@ const (
 )
 
 func init() {
-	installer = &appInstaller{
-		appURL:            appURL,
-		slackClientID:     slackClientID,
-		slackClientSecret: slackClientSecret,
-		verificationToken: verificationToken,
-	}
+	installer = defaultApp()
 }
 
 // StartupControllers call this function to setup the controllers

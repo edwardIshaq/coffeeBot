@@ -1,14 +1,5 @@
 package controller
 
-/*
-Notes:
-------------------------------------------
-Permissions update:
-	When ever the permissions are changed on the App's scopes
-	the button details (found in `func buttonTemplate()``) should be updated from https://api.slack.com/apps/AABQEB4M7/distribute?
-
-
-*/
 import (
 	"SlackPlatform/models"
 	"context"
@@ -18,18 +9,6 @@ import (
 	// "github.com/jinzhu/gorm"
 	"github.com/nlopes/slack"
 )
-
-const (
-	defaultScopes = "commands,groups:read,bot,chat:write:bot"
-)
-
-type appInstaller struct {
-	slack.OAuthResponse
-	appURL            string
-	slackClientID     string
-	slackClientSecret string
-	verificationToken string
-}
 
 /*
 Handler for the install button
@@ -49,12 +28,12 @@ func (installer *appInstaller) buttonTemplate() string {
 	format := `
 	<body>
 		Add this to Slack <br>
-		<a href="https://slack.com/oauth/authorize?client_id=%s&scope=%s">
+		<a href="https://%s/oauth/authorize?client_id=%s&scope=%s">
 			<img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x" />
 		</a>
 	</body>
 	`
-	button := fmt.Sprintf(format, installer.slackClientID, defaultScopes)
+	button := fmt.Sprintf(format, installer.slackHost, installer.slackClientID, installer.scopes)
 	return button
 }
 
@@ -79,12 +58,4 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 		message += fmt.Sprintf("\nscopes: %v", oauthResponse.Scope)
 	}
 	w.Write([]byte(message))
-}
-
-func (installer *appInstaller) saveToDB() {
-	// fmt.Println
-}
-
-func (installer *appInstaller) redirectURL() string {
-	return "https://" + installer.appURL + "/oauthRedirect"
 }
