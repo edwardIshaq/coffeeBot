@@ -23,6 +23,7 @@ import (
 	"SlackPlatform/controller"
 	"SlackPlatform/models"
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -59,7 +60,9 @@ func main() {
 	models.SetDatabase(db)
 	controller.StartupControllers(db, api)
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		fmt.Println(fmt.Errorf("Error listening to 8080, %v", err))
 		panic(err)
 	}
 }
