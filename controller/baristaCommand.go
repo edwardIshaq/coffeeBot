@@ -10,7 +10,6 @@ import (
 
 type slashCommand struct {
 	name string
-	api  *slack.Client
 }
 
 func (s *slashCommand) registerRoutes() {
@@ -19,7 +18,7 @@ func (s *slashCommand) registerRoutes() {
 			http.NotFoundHandler().ServeHTTP(w, r)
 			return
 		}
-		s.api = crossfunction.ClientForRequest(r)
+		api = crossfunction.ClientForRequest(r)
 		s.handleCoffeeCommand(w, r)
 	})
 }
@@ -76,5 +75,5 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 	postParams.Attachments = []slack.Attachment{attachment}
 	postParams.Channel = channelID
 
-	s.api.PostMessage(channelID, "choose a beverage", postParams)
+	api.PostMessage(channelID, "choose a beverage", postParams)
 }

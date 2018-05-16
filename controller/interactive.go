@@ -1,6 +1,11 @@
 package controller
-
+/*
+TODO:
+[ ] handleInteractiveMessages is trying to get the API from the request but I'm not sure its looking in the right place
+	Probably should look under `payload`
+*/
 import (
+	"SlackPlatform/crossfunction"
 	"SlackPlatform/models"
 	"bytes"
 	"context"
@@ -22,6 +27,7 @@ func (i interactive) registerRoutes() {
 }
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
+	api = crossfunction.ClientForRequest(r)
 	actionCallback := parseAttachmentActionCallback(r)
 	callbackID := actionCallback.CallbackID
 	chosenBev := ""
@@ -33,11 +39,12 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	switch callbackID {
 	case "beverage_selection":
 		fmt.Println("interacted with `menu`")
-		//textReply(w, "Customize your order")
 		if len(actionCallback.Actions) >= 1 {
 			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
 				chosenBeverage := actionCallback.Actions[0].SelectedOptions[0].Value
-				postDialog(chosenBeverage, actionCallback.TriggerID)
+				team := models.TeamByID(actionCallback.Team.ID)
+				token := team.AccessToken
+				postDialog(chosenBeverage, actionCallback.TriggerID, token)
 			}
 		}
 		return
@@ -68,12 +75,12 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postDialog(chosenBeverage, triggerID string) {
+func postDialog(chosenBeverage, triggerID, token string) {
 	dialog := makeDialog(chosenBeverage)
 
 	if dialogjson, err := json.Marshal(dialog); err == nil {
 		postBody := url.Values{
-			"token":      {"xoxp-75950428352-75957863573-355080493893-c39a5f8e88a4b08e475dbce0d0b4884e"},
+			"token":      {token},
 			"trigger_id": {triggerID},
 			"dialog":     {string(dialogjson)},
 		}

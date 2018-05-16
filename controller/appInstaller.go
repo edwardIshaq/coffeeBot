@@ -42,6 +42,11 @@ func devApp() *appInstaller {
 	}
 }
 
+/*
+utaApp info https://api.slack.com/apps/AABQEB4M7
+info which is related to a single team `eddie-beta`
+Needs to be stored in DB
+*/
 func prodApp() *appInstaller {
 	//Admin page
 	// utaApp info https://api.slack.com/apps/AABQEB4M7

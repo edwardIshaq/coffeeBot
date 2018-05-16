@@ -1,5 +1,13 @@
 package models
 
+/*
+https://slackcoffeebar.typeform.com/to/v6kODV
+
+TODO:
+[ ] Add all items to DB
+
+*/
+
 import (
 	"github.com/jinzhu/gorm"
 )

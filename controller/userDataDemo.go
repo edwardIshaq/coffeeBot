@@ -37,12 +37,11 @@ func (userData *userDataDemo) handleUserDataRequest(w http.ResponseWriter, r *ht
 	userID := r.PostFormValue("user_id")
 	teamID := r.PostFormValue("team_id")
 	team := models.TeamByID(teamID)
-	slackClient := crossfunction.ClientForRequest(r)
-
-	userData.sendAPIRequest(userID, triggerID, team, slackClient)
+	api = crossfunction.ClientForRequest(r)
+	userData.sendAPIRequest(userID, triggerID, team)
 }
 
-func (userData *userDataDemo) sendAPIRequest(userID, triggerID string, team *models.Team, client *slack.Client) {
+func (userData *userDataDemo) sendAPIRequest(userID, triggerID string, team *models.Team) {
 	postBody := url.Values{
 		"token":      {team.AccessToken},
 		"trigger_id": {triggerID},
