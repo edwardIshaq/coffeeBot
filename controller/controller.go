@@ -24,6 +24,9 @@ const (
 func init() {
 	installer = defaultApp()
 	userScopesDemo = newUserDataDemo()
+	baristaCommand = slashCommand{"coffeeCommand", nil}
+	interact = interactive{}
+
 }
 
 // StartupControllers call this function to setup the controllers
@@ -34,15 +37,7 @@ func StartupControllers(gormDB *gorm.DB, slackAPI *slack.Client) {
 	registerOutgoingHookRoute()
 
 	installer.registerRoutes()
-
-	baristaCommand := slashCommand{
-		name: "coffeeCommand",
-		api:  slackAPI,
-	}
 	baristaCommand.registerRoutes()
-
-	interact := interactive{}
 	interact.registerRoutes()
-
 	userScopesDemo.registerRoutes()
 }

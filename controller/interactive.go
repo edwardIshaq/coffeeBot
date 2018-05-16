@@ -37,8 +37,6 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 		if len(actionCallback.Actions) >= 1 {
 			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
 				chosenBeverage := actionCallback.Actions[0].SelectedOptions[0].Value
-				fmt.Printf("You selected %v", chosenBeverage)
-				fmt.Printf("triggerID: %v", actionCallback.TriggerID)
 				postDialog(chosenBeverage, actionCallback.TriggerID)
 			}
 		}
