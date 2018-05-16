@@ -29,13 +29,7 @@ func (s *slashCommand) route() string {
 }
 
 func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
-	triggerID := r.PostFormValue("trigger_id")
 	channelID := r.PostFormValue("channel_id")
-	s.sendMenu(triggerID, channelID)
-}
-
-func (s *slashCommand) sendMenu(triggerID, channelID string) {
 	attachment := slack.Attachment{}
 	attachment.Text = "Choose a beverage"
 	attachment.Fallback = "Choose a beverage from the menu"

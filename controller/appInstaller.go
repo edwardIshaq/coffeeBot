@@ -24,7 +24,7 @@ func (installer *appInstaller) redirectURL() string {
 }
 
 func defaultApp() *appInstaller {
-	installer = devApp()
+	installer = prodApp()
 	installer.updateSlackAPI()
 	return installer
 }
