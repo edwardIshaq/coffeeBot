@@ -8,6 +8,7 @@ import (
 var (
 	installer      *appInstaller
 	baristaCommand slashCommand
+	userScopesDemo *userDataDemo
 	interact       interactive
 	db             *gorm.DB
 )
@@ -22,6 +23,7 @@ const (
 
 func init() {
 	installer = defaultApp()
+	userScopesDemo = newUserDataDemo()
 }
 
 // StartupControllers call this function to setup the controllers
@@ -41,4 +43,6 @@ func StartupControllers(gormDB *gorm.DB, slackAPI *slack.Client) {
 
 	interact := interactive{}
 	interact.registerRoutes()
+
+	userScopesDemo.registerRoutes()
 }

@@ -23,7 +23,6 @@ func (i interactive) registerRoutes() {
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	actionCallback := parseAttachmentActionCallback(r)
-	fmt.Println()
 	callbackID := actionCallback.CallbackID
 	chosenBev := ""
 	if strings.HasPrefix(actionCallback.CallbackID, "barista.dialog.") {
