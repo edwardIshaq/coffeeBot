@@ -30,7 +30,7 @@ func NewTeam(oauth *slack.OAuthResponse) *Team {
 		BotUserID:      oauth.Bot.BotUserID,
 		BotAccessToken: oauth.Bot.BotAccessToken,
 	}
-
+	//TODO: insert/update existing team
 	db.Debug().Save(team)
 	return team
 }

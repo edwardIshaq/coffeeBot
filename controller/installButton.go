@@ -20,6 +20,7 @@ func (installer *appInstaller) registerRoutes() {
 
 // InstallWTAApplication registers a route to install the app on workspaces
 func (installer *appInstaller) installWTAApplication(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/html")
 	w.Write([]byte(installer.buttonTemplate()))
 }
 
@@ -38,6 +39,7 @@ func (installer *appInstaller) buttonTemplate() string {
 }
 
 func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/html")
 	code := r.FormValue("code")
 	//use `code` to get `OAuthResponse` response back
 	oauthResponse, err := slack.GetOAuthResponseContext(context.Background(), installer.slackClientID, installer.slackClientSecret, code, installer.redirectURL(), false)
@@ -49,10 +51,12 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 	if err == nil {
 		installer.OAuthResponse = *oauthResponse
 		team := models.NewTeam(oauthResponse)
-		fmt.Printf("%v", team)
+		fmt.Printf("\nCreating a new Team:\n%v", team)
 
 		message = ""
-		message += fmt.Sprintf("\nError?: %v", err)
+		if err != nil {
+			message += fmt.Sprintf("\nError?: %v", err)
+		}
 		message += fmt.Sprintf("\nBot token: %v", oauthResponse.Bot)
 		message += fmt.Sprintf("\naccessToken: %v", oauthResponse.AccessToken)
 		message += fmt.Sprintf("\nscopes: %v", oauthResponse.Scope)

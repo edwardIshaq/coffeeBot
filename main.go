@@ -2,6 +2,7 @@ package main
 
 import (
 	"SlackPlatform/controller"
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"fmt"
 	"log"
@@ -22,7 +23,11 @@ func main() {
 	models.SetDatabase(db)
 	controller.StartupControllers(db)
 
-	err := http.ListenAndServe(":8080", nil)
+	//Middleware
+	middlewareHandlers := new(middleware.GzipMiddleware)
+	middlewareHandlers.Next = new(middleware.TeamScope)
+
+	err := http.ListenAndServe(":8080", middlewareHandlers)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error listening to 8080, %v", err))
 		panic(err)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"SlackPlatform/crossfunction"
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"net/http"
 
@@ -15,6 +16,12 @@ type slashCommand struct {
 func (s *slashCommand) registerRoutes() {
 	http.HandleFunc(s.route(), func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
+			http.NotFoundHandler().ServeHTTP(w, r)
+			return
+		}
+
+		teamContext, ok := middleware.AccessToken(r.Context())
+		if !ok {
 			http.NotFoundHandler().ServeHTTP(w, r)
 			return
 		}

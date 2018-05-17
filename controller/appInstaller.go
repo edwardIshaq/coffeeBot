@@ -4,6 +4,12 @@ import (
 	"github.com/nlopes/slack"
 )
 
+func defaultApp() *appInstaller {
+	installer = devApp()
+	installer.updateSlackAPI()
+	return installer
+}
+
 type appInstaller struct {
 	slack.OAuthResponse
 	slackHost         string
@@ -21,12 +27,6 @@ func (installer *appInstaller) updateSlackAPI() {
 
 func (installer *appInstaller) redirectURL() string {
 	return "https://" + installer.appURL + "/oauthRedirect"
-}
-
-func defaultApp() *appInstaller {
-	installer = prodApp()
-	installer.updateSlackAPI()
-	return installer
 }
 
 func devApp() *appInstaller {
