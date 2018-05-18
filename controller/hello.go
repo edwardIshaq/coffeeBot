@@ -8,6 +8,7 @@ import (
 
 func registerHelloRoute() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html")
 		message := r.URL.Path
 		message = strings.TrimPrefix(message, "/")
 		message = "Hello " + message
