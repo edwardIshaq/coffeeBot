@@ -40,5 +40,7 @@
 		}
 	],
 	"rootPath": "SlackPlatform",
-	"heroku.goVersion" : "go1.9.2"
+	"heroku": {
+		"goVersion"	: "go1.9.2"
+	}
 }
