@@ -26,7 +26,7 @@ func main() {
 	middlewareHandlers := new(middleware.GzipMiddleware)
 	middlewareHandlers.Next = new(middleware.TeamScope)
 
-	err := http.ListenAndServe(":8080", middlewareHandlers)
+	err := http.ListenAndServe(determineListenAddress(), middlewareHandlers)
 	if err != nil {
 		fmt.Println(fmt.Errorf("Error listening to 8080, %v", err))
 		panic(err)
