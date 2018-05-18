@@ -4,6 +4,7 @@ import (
 	"SlackPlatform/models"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	// "github.com/jinzhu/gorm"
@@ -61,5 +62,6 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 		message += fmt.Sprintf("\naccessToken: %v", oauthResponse.AccessToken)
 		message += fmt.Sprintf("\nscopes: %v", oauthResponse.Scope)
 	}
+	log.Printf("OAUTH error: %v", err)
 	w.Write([]byte(message))
 }
