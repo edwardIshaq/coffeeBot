@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"flag"
 	"fmt"
+	"os"
 
 	"github.com/nlopes/slack"
 )
@@ -11,29 +11,39 @@ var (
 	apps []*appInstaller
 )
 
-var appFlag = flag.String("appName", "CoffeeBot", "pass in the app's name to set it as default")
-
 func init() {
-	if !flag.Parsed() {
-		flag.Parse()
-	}
 	apps = []*appInstaller{prodApp(), devApp()}
 }
 
 func defaultApp() *appInstaller {
+	selectedApp := getSelectedApp()
+	selectedApp.slackClientSecret = getAppSecret()
+	selectedApp.updateSlackAPI()
+	fmt.Println("running with App: ", selectedApp.appName)
+	return selectedApp
+}
+
+func getSelectedApp() *appInstaller {
+	appName := os.Getenv("APP_NAME")
 	var selectedApp *appInstaller
 	for _, app := range apps {
-		if app.appName == *appFlag {
+		if app.appName == appName {
 			selectedApp = app
 			break
 		}
 	}
 	if selectedApp == nil {
-		panic(fmt.Sprintf("Couldnt find an app match for %v", *appFlag))
+		panic(fmt.Sprintf("Couldnt find an app match for %v", appName))
 	}
-	selectedApp.updateSlackAPI()
-	fmt.Println("running with App: ", selectedApp.appName)
 	return selectedApp
+}
+
+func getAppSecret() string {
+	secret := os.Getenv("COFFEE_BOT_KEY")
+	if len(secret) == 0 {
+		panic(fmt.Sprintf("Need set env variable `COFFEE_BOT_KEY`"))
+	}
+	return secret
 }
 
 type appInstaller struct {
@@ -64,7 +74,6 @@ func devApp() *appInstaller {
 		appURL:            "goplatform.ngrok.io",
 		slackHost:         "dev.slack.com",
 		slackClientID:     "8092351665.24363060625",
-		slackClientSecret: "f711a81815faa802051475eea0c3874a",
 		verificationToken: "mlbDZzxaOiEIZ6I5PIKAwR37",
 		scopes:            "commands,chat:write",
 	}
@@ -83,7 +92,6 @@ func prodApp() *appInstaller {
 		appURL:            "coffee-bot-app.herokuapp.com",
 		slackHost:         "slack.com",
 		slackClientID:     "75950428352.351830378721",
-		slackClientSecret: "a56df86a6f1fae41f4efceaf20fb9842",
 		verificationToken: "8ycguzKPPcWvt7wIsud0a9EL",
 		scopes:            "commands,groups:read,bot,chat:write:bot",
 	}
