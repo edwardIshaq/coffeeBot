@@ -33,12 +33,12 @@ func main() {
 	}
 }
 
-func determineListenAddress() (string, error) {
+func determineListenAddress() string {
 	port := os.Getenv("PORT")
 	if port == "" {
-		return ":8080", fmt.Errorf("$PORT not set")
+		return ":8080"
 	}
-	return ":" + port, nil
+	return ":" + port
 }
 
 func determineDBConnection() string {
