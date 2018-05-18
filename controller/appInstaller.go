@@ -5,7 +5,7 @@ import (
 )
 
 func defaultApp() *appInstaller {
-	installer = devApp()
+	installer = prodApp()
 	installer.updateSlackAPI()
 	return installer
 }
