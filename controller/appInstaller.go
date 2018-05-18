@@ -51,7 +51,7 @@ func prodApp() *appInstaller {
 	//Admin page
 	// utaApp info https://api.slack.com/apps/AABQEB4M7
 	return &appInstaller{
-		appURL:            "goplatform.ngrok.io",
+		appURL:            "coffee-bot-app.herokuapp.com",
 		slackHost:         "slack.com",
 		slackClientID:     "75950428352.351830378721",
 		slackClientSecret: "a56df86a6f1fae41f4efceaf20fb9842",
