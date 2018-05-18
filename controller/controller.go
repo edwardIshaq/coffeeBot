@@ -3,12 +3,12 @@ package controller
 /*
 This will support a basic play grounds for the `utaApp` found at the link below.string
 
-add to slack button:	https://goplatform.ngrok.io/addToSlack
-OAuth handlers:			https://goplatform.ngrok.io/oauthRedirect
-outgoing hook url: 		https://goplatform.ngrok.io/outgoingHooks
-/barista command url:	https://goplatform.ngrok.io/coffeeCommand
-interactive url:		https://goplatform.ngrok.io/interactive
-Dynamic Menu:			https://goplatform.ngrok.io/dynamicMenu
+add to slack button:	/addToSlack
+OAuth handlers:			/oauthRedirect
+outgoing hook url: 		/outgoingHooks
+/barista command url:	/coffeeCommand
+interactive url:		/interactive
+Dynamic Menu:			/dynamicMenu
 
 TODO:
 ------------------------------------------
