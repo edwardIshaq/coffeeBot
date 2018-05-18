@@ -39,5 +39,6 @@
 			"revisionTime": "2018-04-20T12:55:33Z"
 		}
 	],
-	"rootPath": "SlackPlatform"
+	"rootPath": "SlackPlatform",
+	"heroku.goVersion" : "go1.9.2"
 }
