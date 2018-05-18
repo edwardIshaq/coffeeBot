@@ -1,17 +1,44 @@
 package controller
 
 import (
+	"flag"
+	"fmt"
+
 	"github.com/nlopes/slack"
 )
 
+var (
+	apps []*appInstaller
+)
+
+var appFlag = flag.String("appName", "CoffeeBot", "pass in the app's name to set it as default")
+
+func init() {
+	if !flag.Parsed() {
+		flag.Parse()
+	}
+	apps = []*appInstaller{prodApp(), devApp()}
+}
+
 func defaultApp() *appInstaller {
-	installer = prodApp()
-	installer.updateSlackAPI()
-	return installer
+	var selectedApp *appInstaller
+	for _, app := range apps {
+		if app.appName == *appFlag {
+			selectedApp = app
+			break
+		}
+	}
+	if selectedApp == nil {
+		panic(fmt.Sprintf("Couldnt find an app match for %v", *appFlag))
+	}
+	selectedApp.updateSlackAPI()
+	fmt.Println("running with App: ", selectedApp.appName)
+	return selectedApp
 }
 
 type appInstaller struct {
 	slack.OAuthResponse
+	appName           string
 	slackHost         string
 	appURL            string
 	slackClientID     string
@@ -33,6 +60,7 @@ func devApp() *appInstaller {
 	//Admin page
 	//https://api.dev.slack.com/apps/A0QAP1SJD/general
 	return &appInstaller{
+		appName:           "CoffeeBotDev",
 		appURL:            "goplatform.ngrok.io",
 		slackHost:         "dev.slack.com",
 		slackClientID:     "8092351665.24363060625",
@@ -51,6 +79,7 @@ func prodApp() *appInstaller {
 	//Admin page
 	// utaApp info https://api.slack.com/apps/AABQEB4M7
 	return &appInstaller{
+		appName:           "CoffeeBot",
 		appURL:            "coffee-bot-app.herokuapp.com",
 		slackHost:         "slack.com",
 		slackClientID:     "75950428352.351830378721",

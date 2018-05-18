@@ -13,8 +13,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-//DATABASE_URL
-
 func main() {
 	db := connectToGormDB()
 	defer db.Close()
