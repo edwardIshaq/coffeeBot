@@ -41,9 +41,6 @@ func (installer *appInstaller) buttonTemplate() string {
 
 func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
-
-	log.Printf("\noAuthRedirectHandler key-tail= %s", GetAppSecretTail())
-
 	//use `code` to get `OAuthResponse` response back
 	code := r.FormValue("code")
 	oauthResponse, err := slack.GetOAuthResponseContext(context.Background(), installer.slackClientID, installer.slackClientSecret, code, installer.redirectURL(), false)

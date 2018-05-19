@@ -17,8 +17,6 @@ TODO:
 */
 
 import (
-	"log"
-
 	"github.com/jinzhu/gorm"
 	"github.com/nlopes/slack"
 )
@@ -46,7 +44,6 @@ func StartupControllers(gormDB *gorm.DB) {
 	registerHelloRoute()
 	registerOutgoingHookRoute()
 
-	log.Printf("Before installer register routes: key-tail= %s", GetAppSecretTail())
 	installer.registerRoutes()
 	baristaCommand.registerRoutes()
 	interact.registerRoutes()
