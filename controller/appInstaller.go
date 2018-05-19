@@ -46,6 +46,13 @@ func getAppSecret() string {
 	return secret
 }
 
+// GetAppSecretTail is used for debug only !!!
+func GetAppSecretTail() string {
+	secret := getAppSecret()
+	tail := secret[10:len(secret)]
+	return tail
+}
+
 type appInstaller struct {
 	slack.OAuthResponse
 	appName           string
