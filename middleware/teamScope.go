@@ -23,9 +23,13 @@ func (mw *TeamScope) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	team := crossfunction.TeamForRequest(r)
-	ctx := context.WithValue(r.Context(), contextAccessTokenKey, team.AccessToken)
-	contextRequest := r.WithContext(ctx)
-	mw.Next.ServeHTTP(w, contextRequest)
+	if len(team.AccessToken) > 0 {
+		ctx := context.WithValue(r.Context(), contextAccessTokenKey, team.AccessToken)
+		tokenContext := r.WithContext(ctx)
+		mw.Next.ServeHTTP(w, tokenContext)
+	} else {
+		mw.Next.ServeHTTP(w, r)
+	}
 }
 
 // AccessToken gets the team's AccessToken from the context.

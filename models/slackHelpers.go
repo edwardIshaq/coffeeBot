@@ -33,3 +33,12 @@ type action struct {
 type optionValue struct {
 	Value string `json:"value"`
 }
+
+// PayloadResponse a generic action response
+type PayloadResponse struct {
+	ResponseType      string     `json:"type"`
+	CallbackID        string     `json:"callback_id"`
+	Team              slack.Team `json:"team"`
+	User              slack.User `json:"user"`
+	VerificationToken string     `json:"token"`
+}

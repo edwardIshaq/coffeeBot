@@ -24,9 +24,7 @@ func (s *slashCommand) registerRoutes() {
 			http.NotFoundHandler().ServeHTTP(w, r)
 			return
 		}
-		// api = crossfunction.ClientForRequest(r)
 		api = slack.New(teamToken)
-
 		s.handleCoffeeCommand(w, r)
 	})
 }

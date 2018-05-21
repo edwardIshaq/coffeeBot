@@ -14,7 +14,10 @@
             "port": 2345,
             "host": "127.0.0.1",
             "program": "${workspaceRoot}",
-            "env": {},
+            "env": {
+                "APP_NAME": "CoffeeBotDev",
+                "COFFEE_BOT_KEY": "04ec9374374e11410937f85e70a4a0cf"
+            },
             "args": [],
             "showLog": true
         }

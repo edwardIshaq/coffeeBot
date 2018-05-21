@@ -119,13 +119,6 @@ type Beverage struct {
 	Comment         string
 }
 
-func newBev() Beverage {
-	bev := Beverage{}
-	bev.CupType = string(cupSizeDefault)
-	bev.Temperture = string(tempHot)
-	return bev
-}
-
 func newBeverage(name string, espresso espressoOption, syrup syrup, cup cupType) Beverage {
 	return Beverage{
 		Name:       name,
@@ -153,16 +146,7 @@ func BeverageByName(name string) Beverage {
 			return bev
 		}
 	}
-	return defaultBeverage(name)
-}
-
-func defaultBeverage(name string) Beverage {
-	return Beverage{
-		Espresso:   string(espressoSingle),
-		Syrup:      string(syrupMint),
-		Temperture: string(tempHot),
-		CupType:    string(cupSize8oz),
-	}
+	return newBeverage("", espressoSingle, syrupMint, cupSize8oz)
 }
 
 // Drink Menus

@@ -1,11 +1,12 @@
 package controller
+
 /*
 TODO:
 [ ] handleInteractiveMessages is trying to get the API from the request but I'm not sure its looking in the right place
 	Probably should look under `payload`
 */
 import (
-	"SlackPlatform/crossfunction"
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"bytes"
 	"context"
@@ -27,7 +28,13 @@ func (i interactive) registerRoutes() {
 }
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
-	api = crossfunction.ClientForRequest(r)
+	token, ok := middleware.AccessToken(r.Context())
+	if ok == false {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	//Process callback to extract `barista.dialog.<chosenBev>`
 	actionCallback := parseAttachmentActionCallback(r)
 	callbackID := actionCallback.CallbackID
 	chosenBev := ""
@@ -42,8 +49,6 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 		if len(actionCallback.Actions) >= 1 {
 			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
 				chosenBeverage := actionCallback.Actions[0].SelectedOptions[0].Value
-				team := models.TeamByID(actionCallback.Team.ID)
-				token := team.AccessToken
 				postDialog(chosenBeverage, actionCallback.TriggerID, token)
 			}
 		}
