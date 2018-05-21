@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"SlackPlatform/middleware"
+	"SlackPlatform/crossfunction"
 	"SlackPlatform/models"
 	"net/http"
 
@@ -15,16 +15,11 @@ type slashCommand struct {
 func (s *slashCommand) registerRoutes() {
 	http.HandleFunc(s.route(), func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
-			http.NotFoundHandler().ServeHTTP(w, r)
+			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
-		teamToken, ok := middleware.AccessToken(r.Context())
-		if !ok {
-			http.NotFoundHandler().ServeHTTP(w, r)
-			return
-		}
-		api = slack.New(teamToken)
+		api = crossfunction.ClientForRequest(r)
 		s.handleCoffeeCommand(w, r)
 	})
 }
