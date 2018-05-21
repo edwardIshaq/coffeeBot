@@ -2,7 +2,7 @@ package controller
 
 import (
 	"SlackPlatform/crossfunction"
-	"SlackPlatform/models"
+	"SlackPlatform/middleware"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -14,41 +14,73 @@ import (
 )
 
 const (
-	userDataScopes        = "reminders:write:user"
+	userDataScopes = "reminders:write:user"
+
+	channelScopes         = "channels:history"
+	teamScopes            = "emoji:read"
+	permissionAddScopeAPI = "apps.permissions.request"
+
+	userScopes            = "reminders:write:user"
 	permissionUserDataAPI = "apps.permissions.users.request"
 )
 
-type userDataDemo struct {
-	scopes string
+func registerPermissionsRequestsRoutes() {
+	//invoked via slash command: `/request_user_data`
+	http.HandleFunc("/request_userdata_scopes", handleScopeRequests)
+	//invoked via slash command: `/request_team_data`
+	http.HandleFunc("/request_team_scopes", handleScopeRequests)
+	//invoked via slash command: `/request_channel_data`
+	http.HandleFunc("/request_channel_scopes", handleScopeRequests)
 }
 
-func newUserDataDemo() *userDataDemo {
-	return &userDataDemo{
-		scopes: userDataScopes,
+func handleScopeRequests(w http.ResponseWriter, r *http.Request) {
+	fmt.Println()
+	fmt.Printf("called handleScopeRequests %s\n", r.RequestURI)
+	fmt.Printf("Passed PostForm: %v", r.PostForm)
+
+	var scopes string
+	var apiURL string
+
+	switch r.RequestURI {
+	case "/request_team_scopes":
+		scopes = teamScopes
+		apiURL = permissionAddScopeAPI
+
+	case "/request_channel_scopes":
+		scopes = channelScopes
+		apiURL = permissionAddScopeAPI
+
+	case "/request_userdata_scopes":
+		scopes = userScopes
+		apiURL = permissionUserDataAPI
 	}
-}
 
-func (userData *userDataDemo) registerRoutes() {
-	http.HandleFunc("/request_userdata_scopes", userData.handleUserDataRequest)
-}
+	fmt.Println()
+	fmt.Printf("request scopes: %s, using api: %s", scopes, apiURL)
+	fmt.Println()
 
-func (userData *userDataDemo) handleUserDataRequest(w http.ResponseWriter, r *http.Request) {
 	triggerID := r.PostFormValue("trigger_id")
 	userID := r.PostFormValue("user_id")
-	teamID := r.PostFormValue("team_id")
-	team := models.TeamByID(teamID)
+
 	api = crossfunction.ClientForRequest(r)
-	userData.sendAPIRequest(userID, triggerID, team)
+	accessToken, ok := middleware.AccessToken(r.Context())
+	if !ok {
+		fmt.Printf("Error retrieving access token")
+		return
+	}
+	requestScopes(userID, triggerID, accessToken, scopes, apiURL)
 }
 
-func (userData *userDataDemo) sendAPIRequest(userID, triggerID string, team *models.Team) {
+func requestScopes(userID, triggerID, accessToken, scopes, endpoint string) {
 	postBody := url.Values{
-		"token":      {team.AccessToken},
-		"trigger_id": {triggerID},
-		"scopes":     {userData.scopes},
+		"token":       {accessToken},
+		"scopes":      {scopes},
+		"trigger_id":  {triggerID},
+		"did_confirm": {"false"},
 	}
+	fmt.Printf("\npostBody = %v\n", postBody)
 	reqBody := strings.NewReader(postBody.Encode())
-	req, err := http.NewRequest("POST", slack.SLACK_API+permissionUserDataAPI, reqBody)
+	req, err := http.NewRequest("POST", slack.SLACK_API+endpoint, reqBody)
 	if err != nil {
 		fmt.Println("error happened: ", err)
 		return
@@ -65,7 +97,8 @@ func (userData *userDataDemo) sendAPIRequest(userID, triggerID string, team *mod
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode == http.StatusOK {
+	// if resp.StatusCode == http.StatusOK
+	{
 		bodyBytes, err2 := ioutil.ReadAll(resp.Body)
 		if err2 != nil {
 			fmt.Printf("error reading body %v", err2)

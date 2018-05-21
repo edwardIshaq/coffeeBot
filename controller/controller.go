@@ -24,7 +24,6 @@ import (
 var (
 	installer      *appInstaller
 	baristaCommand slashCommand
-	userScopesDemo *userDataDemo
 	interact       interactive
 	db             *gorm.DB
 	api            *slack.Client
@@ -32,7 +31,6 @@ var (
 
 func init() {
 	installer = defaultApp()
-	userScopesDemo = newUserDataDemo()
 	baristaCommand = slashCommand{"coffeeCommand"}
 	interact = interactive{}
 }
@@ -47,5 +45,5 @@ func StartupControllers(gormDB *gorm.DB) {
 	installer.registerRoutes()
 	baristaCommand.registerRoutes()
 	interact.registerRoutes()
-	userScopesDemo.registerRoutes()
+	registerPermissionsRequestsRoutes()
 }
