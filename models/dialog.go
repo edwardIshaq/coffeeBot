@@ -62,6 +62,7 @@ type DialogSubmitCallback struct {
 // FeedbackMessage reply to dialog with an attachment message
 func (d DialogSubmitCallback) FeedbackMessage(chosenBev string) *slack.Msg {
 	fields := []slack.AttachmentField{}
+	saveBeverage(d.Submission, d.User.ID)
 	for key, value := range d.Submission {
 		fields = append(fields,
 			slack.AttachmentField{
