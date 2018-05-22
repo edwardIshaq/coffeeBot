@@ -21,7 +21,6 @@ func teamIDFromRequest(r *http.Request) (string, error) {
 	slackResp := &models.PayloadResponse{}
 	payload := r.PostFormValue("payload")
 	json.Unmarshal([]byte(payload), &slackResp)
-	fmt.Printf("\nSlackResponse: %v \n", slackResp)
 
 	responseTeamID := slackResp.Team.ID
 	if len(responseTeamID) > 0 {

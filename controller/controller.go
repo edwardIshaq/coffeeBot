@@ -41,9 +41,9 @@ func StartupControllers(gormDB *gorm.DB) {
 	//Demo routes
 	registerHelloRoute()
 	registerOutgoingHookRoute()
+	registerPermissionsRequestsRoutes()
 
 	installer.registerRoutes()
 	baristaCommand.registerRoutes()
 	interact.registerRoutes()
-	registerPermissionsRequestsRoutes()
 }

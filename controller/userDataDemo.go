@@ -14,8 +14,6 @@ import (
 )
 
 const (
-	userDataScopes = "reminders:write:user"
-
 	channelScopes         = "channels:history"
 	teamScopes            = "emoji:read"
 	permissionAddScopeAPI = "apps.permissions.request"
