@@ -10,6 +10,7 @@ var db *gorm.DB
 // SetDatabase sets up the DB
 func SetDatabase(database *gorm.DB) {
 	db = database
+	db.LogMode(true)
 	setupTables()
 }
 

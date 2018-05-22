@@ -16,5 +16,4 @@ func registerHelloRoute() {
 		message += "\nBody:" + fmt.Sprintf("%s", r.Body)
 		w.Write([]byte(message))
 	})
-
 }

@@ -21,18 +21,17 @@ type Team struct {
 
 // NewTeam constructs a new `Team` with `slack.OAuthResponse`
 func NewTeam(oauth *slack.OAuthResponse) *Team {
-	team := &Team{
-		TeamID:         oauth.TeamID,
-		TeamName:       oauth.TeamName,
-		AccessToken:    oauth.AccessToken,
-		Scope:          oauth.Scope,
-		UserID:         oauth.UserID,
-		BotUserID:      oauth.Bot.BotUserID,
-		BotAccessToken: oauth.Bot.BotAccessToken,
-	}
-	//TODO: insert/update existing team
-	db.Debug().Save(team)
-	return team
+	newTeam := &Team{}
+	db.Where(&Team{TeamID: oauth.TeamID}).FirstOrInit(&newTeam)
+
+	newTeam.TeamName = oauth.TeamName
+	newTeam.AccessToken = oauth.AccessToken
+	newTeam.Scope = oauth.Scope
+	newTeam.UserID = oauth.UserID
+	newTeam.BotUserID = oauth.Bot.BotUserID
+	newTeam.BotAccessToken = oauth.Bot.BotAccessToken
+	db.Save(&newTeam)
+	return newTeam
 }
 
 // TeamByID returns a team if found or Nil
