@@ -22,7 +22,7 @@ type Beverage struct {
 	UserID         string
 }
 
-func newBeverage(name string, espresso espressoOption, syrup syrup, cup cupType) Beverage {
+func newBeverage(name, espresso, syrup, cup string) Beverage {
 	return Beverage{
 		Name:       name,
 		Espresso:   string(espresso),
@@ -95,4 +95,21 @@ func BeverageByName(name string) Beverage {
 		}
 	}
 	return newBeverage("", espressoSingle, syrupMint, cupSize8oz)
+}
+
+// DefaultDrinks is the list of default drinks
+// will be loading it from the DB
+func DefaultDrinks() []Beverage {
+	return []Beverage{
+		Beverage{
+			DefaultDrink: true,
+			Name:         "Espresso",
+			Espresso:     espressoSingle,
+		},
+		Beverage{
+			DefaultDrink: true,
+			Name:         "Hot Chocolate",
+			Espresso:     espressoNone,
+		},
+	}
 }
