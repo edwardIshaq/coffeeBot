@@ -51,8 +51,7 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 	message := "Something wrong happened"
 	if err == nil {
 		installer.OAuthResponse = *oauthResponse
-		team := models.NewTeam(oauthResponse)
-		fmt.Printf("\nCreating a new Team:\n%v", team)
+		models.NewTeam(oauthResponse)
 
 		message = ""
 		if err != nil {

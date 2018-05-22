@@ -9,7 +9,7 @@ import (
 type Team struct {
 	gorm.Model
 
-	TeamID      string
+	TeamID      string `gorm:"UNIQUE"`
 	TeamName    string
 	AccessToken string
 	Scope       string
