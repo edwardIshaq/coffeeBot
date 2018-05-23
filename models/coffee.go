@@ -10,26 +10,26 @@ TODO:
 
 // cupType is the drink size of a beverage
 const (
-	cupTypeGibraltar string = "Gibraltar Glass"
 	cupSize6oz       string = "6oz cup"
 	cupSize8oz       string = "8oz cup"
 	cupSize12oz      string = "12oz mug"
 	cupSize8ozPaper  string = "8oz paper"
 	cupSize12ozPaper string = "12oz paper"
 	cupSizePint      string = "Pint glass"
+	cupSizeGibraltar string = "Gibraltar Glass"
 	cupSizeDefault   string = "regular"
 )
 
 // AllDrinkSizes a list of all possible DrinkSize
 func AllDrinkSizes() []string {
 	return []string{
-		cupTypeGibraltar,
 		cupSize6oz,
 		cupSize8oz,
 		cupSize12oz,
 		cupSize8ozPaper,
 		cupSize12ozPaper,
 		cupSizePint,
+		cupSizeGibraltar,
 		cupSizeDefault,
 	}
 }

@@ -77,24 +77,14 @@ func saveBeverage(submission map[string]string, userID string) {
 	db.Save(&bev)
 }
 
-func beverageList() []Beverage {
-	espresso := newBeverage("Espresso", espressoSingle, syrupNone, cupSize8oz)
-
-	return []Beverage{
-		espresso,
-		newBeverage("Vitality Latte", espressoQuad, syrupHoney, cupSize8oz),
-	}
-}
-
 // BeverageByName gets you a preset beverage or an empty one if not found
 func BeverageByName(name string) Beverage {
-	list := beverageList()
-	for _, bev := range list {
+	for _, bev := range DefaultDrinks() {
 		if bev.Name == name {
 			return bev
 		}
 	}
-	return newBeverage("", espressoSingle, syrupMint, cupSize8oz)
+	return Beverage{}
 }
 
 // DefaultDrinks is the list of default drinks
@@ -102,14 +92,40 @@ func BeverageByName(name string) Beverage {
 func DefaultDrinks() []Beverage {
 	return []Beverage{
 		Beverage{
-			DefaultDrink: true,
-			Name:         "Espresso",
-			Espresso:     espressoSingle,
+			DefaultDrink:   true,
+			Name:           "Double Espresso",
+			Espresso:       espressoDouble,
+			CupType:        cupSize6oz,
+			Syrup:          syrupNone,
+			Temperture:     tempHot,
+			DrinkOfTheWeek: false,
 		},
 		Beverage{
-			DefaultDrink: true,
-			Name:         "Hot Chocolate",
-			Espresso:     espressoNone,
+			DefaultDrink:   true,
+			Name:           "Hot Chocolate",
+			Espresso:       espressoNone,
+			CupType:        cupSize8oz,
+			Syrup:          syrupNone,
+			Temperture:     tempHot,
+			DrinkOfTheWeek: false,
+		},
+		Beverage{
+			DefaultDrink:   true,
+			Name:           "Tea",
+			Espresso:       espressoNone,
+			CupType:        cupSize8oz,
+			Syrup:          syrupHoney,
+			Temperture:     tempHot,
+			DrinkOfTheWeek: false,
+		},
+		Beverage{
+			DefaultDrink:   true,
+			Name:           "Iced Tea",
+			Espresso:       espressoNone,
+			CupType:        cupSize8oz,
+			Syrup:          syrupHoney,
+			Temperture:     tempIced,
+			DrinkOfTheWeek: false,
 		},
 	}
 }
