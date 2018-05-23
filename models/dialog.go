@@ -62,7 +62,12 @@ type DialogSubmitCallback struct {
 // FeedbackMessage reply to dialog with an attachment message
 func (d DialogSubmitCallback) FeedbackMessage(chosenBev string) *slack.Msg {
 	fields := []slack.AttachmentField{}
-	saveBeverage(d.Submission, d.User.ID)
+
+	d.Submission["Name"] = chosenBev
+	go func(d DialogSubmitCallback) {
+		saveBeverage(d.Submission, d.User.ID)
+	}(d)
+
 	for key, value := range d.Submission {
 		fields = append(fields,
 			slack.AttachmentField{
@@ -88,11 +93,20 @@ func (d DialogSubmitCallback) FeedbackMessage(chosenBev string) *slack.Msg {
 						Type:  "button",
 						Name:  "Save",
 						Text:  "Save",
-						Value: "Save",
+						Value: "SaveBeverage",
 					},
 				},
 			},
 		},
 	}
 	return params
+}
+
+// ExtractNames from the []Beverage
+func ExtractNames(bevs []Beverage) []string {
+	names := make([]string, 10)
+	for _, bev := range bevs {
+		names = append(names, bev.Name)
+	}
+	return names
 }

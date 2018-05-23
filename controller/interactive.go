@@ -16,7 +16,6 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/nlopes/slack"
 )
@@ -29,7 +28,7 @@ func (i interactive) registerRoutes() {
 
 func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	token, ok := middleware.AccessToken(r.Context())
-	if ok == false {
+	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -55,7 +54,6 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 		return
 
 	case "barista.dialog":
-		startTime := time.Now()
 		dialogResponse := models.DialogSubmitCallback{}
 		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
 		responseURL := dialogResponse.ResponseURL
@@ -74,9 +72,12 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			defer resp.Body.Close()
-			fmt.Printf("RESPONSE: %v", resp)
-			fmt.Printf("\nprocessing Dialog took: %s\n", time.Since(startTime))
 		}(params, responseURL)
+
+	case "saveOrder":
+		fmt.Println()
+		payload := r.PostFormValue("payload")
+		fmt.Printf("payload= %v\n", payload)
 	}
 }
 
@@ -135,7 +136,7 @@ func makeDialog(chosenBeverage string) models.Dialog {
 	tempMenu := models.NewStaticSelectDialogInput("Temperture", "Temperture", models.AllTemps())
 	tempMenu.Value = presetBeverage.Temperture
 
-	commentInput := models.NewTextAreaInput("Comment", "Comments")
+	commentInput := models.NewTextAreaInput("Comment", "Comments", presetBeverage.Comment)
 	commentInput.Optional = true
 
 	callbackID := "barista.dialog." + chosenBeverage
@@ -156,7 +157,6 @@ func makeDialog(chosenBeverage string) models.Dialog {
 }
 
 func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallback {
-	r.ParseForm()
 	payload := r.PostFormValue("payload")
 	actionCallback := slack.AttachmentActionCallback{}
 	json.Unmarshal([]byte(payload), &actionCallback)

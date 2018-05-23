@@ -37,12 +37,13 @@ func NewTextInput(name, label string) *TextInputElement {
 }
 
 // NewTextAreaInput constructor for a `textarea` input
-func NewTextAreaInput(name, label string) *TextInputElement {
+func NewTextAreaInput(name, label, text string) *TextInputElement {
 	return &TextInputElement{
 		DialogInput: DialogInput{
 			Type:  InputTypeTextArea,
 			Name:  name,
 			Label: label,
 		},
+		Value: text,
 	}
 }

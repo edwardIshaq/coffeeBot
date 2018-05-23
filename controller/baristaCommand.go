@@ -36,13 +36,16 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 	attachment.Color = "#3AA3E3"
 	attachment.CallbackID = "beverage_selection"
 
-	allDefaultDrinks := models.DefaultDrinks()
-	defaultNames := make([]string, 10)
-	for _, bev := range allDefaultDrinks {
-		defaultNames = append(defaultNames, bev.Name)
+	//User Beverages
+	userID := r.PostFormValue("user_id")
+	userBevs := models.ExtractNames(models.BeveragesForUser(userID))
+	userDrinks := slack.AttachmentActionOptionGroup{
+		Text:    "User Beverages",
+		Options: models.MakeAttachmentOptions(userBevs),
 	}
 
 	// default drinks
+	defaultNames := models.ExtractNames(models.DefaultDrinks())
 	defaultDrinks := slack.AttachmentActionOptionGroup{
 		Text:    "Default",
 		Options: models.MakeAttachmentOptions(defaultNames),
@@ -58,7 +61,7 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Drink of the Week",
 		Options: models.MakeAttachmentOptions(models.AllDrinksOfTheWeek()),
-	}	
+	}
 
 	// Regular Drinks Menu
 	regularDrinksGroup := slack.AttachmentActionOptionGroup{
@@ -76,7 +79,7 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 		Name:         "beverage_menu",
 		Text:         "Select beverage",
 		Type:         "select",
-		OptionGroups: []slack.AttachmentActionOptionGroup{defaultDrinks, coffeeGroup, regularDrinksGroup, teaDrinksGroup, drinkOfTheWeekGroup},
+		OptionGroups: []slack.AttachmentActionOptionGroup{userDrinks, defaultDrinks, coffeeGroup, regularDrinksGroup, teaDrinksGroup, drinkOfTheWeekGroup},
 	}
 
 	attachment.Actions = []slack.AttachmentAction{menuAction}

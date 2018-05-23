@@ -129,3 +129,11 @@ func DefaultDrinks() []Beverage {
 		},
 	}
 }
+
+// BeveragesForUser fetches the Beverages for that user
+func BeveragesForUser(userID string) []Beverage {
+	bevs := []Beverage{}
+	db.Where(&Beverage{UserID: userID}).Find(&bevs)
+	fmt.Println(bevs)
+	return bevs
+}
