@@ -103,6 +103,6 @@ func requestScopes(userID, triggerID, accessToken, scopes, endpoint string) {
 			return
 		}
 		bodyString := string(bodyBytes)
-		fmt.Println("\nbodyString: ", bodyString)
+		fmt.Println("\nPermission response: ", bodyString)
 	}
 }
