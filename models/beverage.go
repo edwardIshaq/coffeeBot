@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strconv"
 
 	"github.com/jinzhu/gorm"
 )
@@ -11,11 +12,13 @@ import (
 // Beverage type will hold the default selections for the menus
 type Beverage struct {
 	gorm.Model
+	Category       string
 	Name           string
 	Espresso       string
 	Syrup          string
 	Temperture     string
 	CupType        string
+	Milk           string
 	DrinkOfTheWeek bool
 	DefaultDrink   bool
 	Comment        string
@@ -58,10 +61,14 @@ func setField(obj interface{}, name string, value interface{}) error {
 map[Comment: CupType:8oz paper Espresso:single Syrup:Lavender Temperture:hot]
 */
 func saveBeverage(submission map[string]string, userID string) {
-	bev := &Beverage{}
+
+	bev := BeverageByID(submission["ID"])
+	submission["Name"] = bev.Name
+	delete(submission, "ID")
+
 	var err error
 	for k, v := range submission {
-		err = setField(bev, k, v)
+		err = setField(&bev, k, v)
 		if err != nil {
 			break
 		}
@@ -77,57 +84,15 @@ func saveBeverage(submission map[string]string, userID string) {
 	db.Save(&bev)
 }
 
-// BeverageByName gets you a preset beverage or an empty one if not found
-func BeverageByName(name string) Beverage {
-	for _, bev := range DefaultDrinks() {
-		if bev.Name == name {
-			return bev
-		}
+// BeverageByID finds a beverage by ID (string)
+func BeverageByID(id string) Beverage {
+	bevID, err := strconv.Atoi(id)
+	if err != nil {
+		return Beverage{}
 	}
-	return Beverage{}
-}
-
-// DefaultDrinks is the list of default drinks
-// will be loading it from the DB
-func DefaultDrinks() []Beverage {
-	return []Beverage{
-		Beverage{
-			DefaultDrink:   true,
-			Name:           "Double Espresso",
-			Espresso:       espressoDouble,
-			CupType:        cupSize6oz,
-			Syrup:          syrupNone,
-			Temperture:     tempHot,
-			DrinkOfTheWeek: false,
-		},
-		Beverage{
-			DefaultDrink:   true,
-			Name:           "Hot Chocolate",
-			Espresso:       espressoNone,
-			CupType:        cupSize8oz,
-			Syrup:          syrupNone,
-			Temperture:     tempHot,
-			DrinkOfTheWeek: false,
-		},
-		Beverage{
-			DefaultDrink:   true,
-			Name:           "Tea",
-			Espresso:       espressoNone,
-			CupType:        cupSize8oz,
-			Syrup:          syrupHoney,
-			Temperture:     tempHot,
-			DrinkOfTheWeek: false,
-		},
-		Beverage{
-			DefaultDrink:   true,
-			Name:           "Iced Tea",
-			Espresso:       espressoNone,
-			CupType:        cupSize8oz,
-			Syrup:          syrupHoney,
-			Temperture:     tempIced,
-			DrinkOfTheWeek: false,
-		},
-	}
+	beverage := Beverage{}
+	db.First(&beverage, bevID)
+	return beverage
 }
 
 // BeveragesForUser fetches the Beverages for that user
@@ -136,4 +101,30 @@ func BeveragesForUser(userID string) []Beverage {
 	db.Where(&Beverage{UserID: userID}).Find(&bevs)
 	fmt.Println(bevs)
 	return bevs
+}
+
+// UserBeveragesMenu returns [pk]Name
+func UserBeveragesMenu(userID string) map[string]string {
+	list := BeveragesForUser(userID)
+	menuMap := make(map[string]string)
+	for _, bev := range list {
+		menuMap[string(bev.ID)] = bev.Name
+	}
+	return menuMap
+}
+
+// MenuMap extract a map[bev.ID]bev.Name from a []Beverage
+func MenuMap(bevs []Beverage) map[string]string {
+	result := make(map[string]string)
+	for _, bev := range bevs {
+		result[fmt.Sprint(bev.ID)] = bev.Name
+	}
+	return result
+}
+
+// BeveragesByCategory select standard bevs by a specific category
+func BeveragesByCategory(category string) []Beverage {
+	result := []Beverage{}
+	db.Where(&Beverage{Category: category, DefaultDrink: true}).Find(&result)
+	return result
 }

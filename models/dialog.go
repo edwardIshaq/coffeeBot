@@ -63,7 +63,7 @@ type DialogSubmitCallback struct {
 func (d DialogSubmitCallback) FeedbackMessage(chosenBev string) *slack.Msg {
 	fields := []slack.AttachmentField{}
 
-	d.Submission["Name"] = chosenBev
+	d.Submission["ID"] = chosenBev
 	go func(d DialogSubmitCallback) {
 		saveBeverage(d.Submission, d.User.ID)
 	}(d)

@@ -122,7 +122,7 @@ func postDialog(chosenBeverage, triggerID, token string) {
 }
 
 func makeDialog(chosenBeverage string) models.Dialog {
-	presetBeverage := models.BeverageByName(chosenBeverage)
+	presetBeverage := models.BeverageByID(chosenBeverage)
 
 	cupMenu := models.NewStaticSelectDialogInput("CupType", "Drink Size", models.AllDrinkSizes())
 	cupMenu.Value = presetBeverage.CupType
@@ -143,7 +143,7 @@ func makeDialog(chosenBeverage string) models.Dialog {
 
 	dialog := models.Dialog{
 		CallbackID:  callbackID,
-		Title:       models.DialogTitle(chosenBeverage),
+		Title:       models.DialogTitle(presetBeverage.Name),
 		SubmitLabel: "Order",
 		Elements: []interface{}{
 			cupMenu,

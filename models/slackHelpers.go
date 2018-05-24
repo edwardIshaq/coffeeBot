@@ -17,6 +17,19 @@ func MakeAttachmentOptions(ss []string) []slack.AttachmentActionOption {
 	return actionOptions
 }
 
+// MakeAttachmentOptionsFromMap converts a map of `map[string]string` to slack menu options
+func MakeAttachmentOptionsFromMap(m map[string]string) []slack.AttachmentActionOption {
+	actionOptions := []slack.AttachmentActionOption{}
+	for value, text := range m {
+		actionOptions = append(actionOptions,
+			slack.AttachmentActionOption{
+				Text:  text,
+				Value: value,
+			})
+	}
+	return actionOptions
+}
+
 // ------------------------------------------
 type menuResponse struct {
 	Type      string   `json:"type"`

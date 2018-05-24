@@ -38,48 +38,34 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 
 	//User Beverages
 	userID := r.PostFormValue("user_id")
-	userBevs := models.ExtractNames(models.BeveragesForUser(userID))
 	userDrinks := slack.AttachmentActionOptionGroup{
 		Text:    "User Beverages",
-		Options: models.MakeAttachmentOptions(userBevs),
-	}
-
-	// default drinks
-	defaultNames := models.ExtractNames(models.DefaultDrinks())
-	defaultDrinks := slack.AttachmentActionOptionGroup{
-		Text:    "Default",
-		Options: models.MakeAttachmentOptions(defaultNames),
+		Options: menuFromBevs(models.BeveragesForUser(userID)),
 	}
 
 	// Coffees
 	coffeeGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Coffee",
-		Options: models.MakeAttachmentOptions(models.AllCoffees()),
+		Options: menuFromBevs(models.BeveragesByCategory("Coffee")),
 	}
 
 	//drinkOfTheWeekGroup
 	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Drink of the Week",
-		Options: models.MakeAttachmentOptions(models.AllDrinksOfTheWeek()),
-	}
-
-	// Regular Drinks Menu
-	regularDrinksGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Usual Drinks",
-		Options: models.MakeAttachmentOptions(models.AllUsualDrinks()),
+		Text:    "Drink of the week",
+		Options: menuFromBevs(models.BeveragesByCategory("Drink of the week")),
 	}
 
 	// Tea
 	teaDrinksGroup := slack.AttachmentActionOptionGroup{
 		Text:    "Tea",
-		Options: models.MakeAttachmentOptions(models.AllTeas()),
+		Options: menuFromBevs(models.BeveragesByCategory("Tea")),
 	}
 
 	menuAction := slack.AttachmentAction{
 		Name:         "beverage_menu",
 		Text:         "Select beverage",
 		Type:         "select",
-		OptionGroups: []slack.AttachmentActionOptionGroup{userDrinks, defaultDrinks, coffeeGroup, regularDrinksGroup, teaDrinksGroup, drinkOfTheWeekGroup},
+		OptionGroups: []slack.AttachmentActionOptionGroup{userDrinks, coffeeGroup, teaDrinksGroup, drinkOfTheWeekGroup},
 	}
 
 	attachment.Actions = []slack.AttachmentAction{menuAction}
@@ -92,4 +78,9 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 	postParams.Channel = channelID
 
 	api.PostMessage(channelID, "choose a beverage", postParams)
+}
+
+func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
+	bevsMap := models.MenuMap(bevs)
+	return models.MakeAttachmentOptionsFromMap(bevsMap)
 }

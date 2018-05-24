@@ -94,6 +94,22 @@ func AllSyrupOptions() []string {
 	}
 }
 
+const (
+	milk2      string = "Milk 2%"
+	milkWhole  string = "Whole milk"
+	milk0      string = "Milk 0 fat"
+	milkHalf   string = "Half & Half"
+	milkAlmond string = "Almond milk"
+	milkSoy    string = "Soy milk"
+	milkCashew string = "Cashew milk"
+	milkNone   string = "No milk"
+)
+
+// AllMilkOptions a list of all `Milk` types
+func AllMilkOptions() []string {
+	return []string{milk0, milk2, milkAlmond, milkCashew, milkHalf, milkSoy, milkWhole, milkNone}
+}
+
 // Drink Menus
 
 // AllDrinksOfTheWeek list
