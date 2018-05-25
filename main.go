@@ -8,12 +8,14 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 )
 
 func main() {
+	runtime.GOMAXPROCS(4)
 	db := connectToGormDB()
 	defer db.Close()
 
