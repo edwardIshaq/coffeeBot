@@ -13,11 +13,13 @@ func SetDatabase(database *gorm.DB) {
 	db.LogMode(true)
 	setupTables()
 	saveAllDrinksToDB()
+	testGrouping()
 }
 
 func setupTables() {
 	db.AutoMigrate(&Team{})
 	db.AutoMigrate(&Beverage{})
+	db.Model(&Beverage{}).AddUniqueIndex("uniq_idx_default_bevs", "category", "name", "default_drink")
 }
 
 // a hack to prevent duplicating the default drinks
@@ -26,13 +28,11 @@ func saveAllDrinksToDB() {
 	drinks = append(drinks, TeaDrinks()...)
 	drinks = append(drinks, DrinkOfTheWeek()...)
 
-	var count int
-	db.Where(&Beverage{DefaultDrink: true}).Model(&Beverage{}).Count(&count)
-	if count == len(drinks) {
-		return
-	}
-
 	for _, bev := range drinks {
 		db.Save(&bev)
 	}
+}
+
+func testGrouping() {
+
 }
