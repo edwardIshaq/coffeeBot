@@ -13,7 +13,6 @@ func SetDatabase(database *gorm.DB) {
 	db.LogMode(true)
 	setupTables()
 	saveAllDrinksToDB()
-	testGrouping()
 }
 
 func setupTables() {
@@ -31,8 +30,4 @@ func saveAllDrinksToDB() {
 	for _, bev := range drinks {
 		db.Save(&bev)
 	}
-}
-
-func testGrouping() {
-
 }

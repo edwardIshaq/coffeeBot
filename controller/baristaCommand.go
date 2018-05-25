@@ -43,29 +43,23 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 		Options: menuFromBevs(models.BeveragesForUser(userID)),
 	}
 
-	// Coffees
-	coffeeGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Coffee",
-		Options: menuFromBevs(models.BeveragesByCategory("Coffee")),
-	}
+	optionGroups := []slack.AttachmentActionOptionGroup{userDrinks}
 
-	//drinkOfTheWeekGroup
-	drinkOfTheWeekGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Drink of the week",
-		Options: menuFromBevs(models.BeveragesByCategory("Drink of the week")),
-	}
-
-	// Tea
-	teaDrinksGroup := slack.AttachmentActionOptionGroup{
-		Text:    "Tea",
-		Options: menuFromBevs(models.BeveragesByCategory("Tea")),
+	//The rest of the drinks from the DB
+	allBevs := models.AllBeveragesByCategory()
+	for category, beverages := range allBevs {
+		optionGroups = append(optionGroups,
+			slack.AttachmentActionOptionGroup{
+				Text:    category,
+				Options: menuFromBevs(beverages),
+			})
 	}
 
 	menuAction := slack.AttachmentAction{
 		Name:         "beverage_menu",
 		Text:         "Select beverage",
 		Type:         "select",
-		OptionGroups: []slack.AttachmentActionOptionGroup{userDrinks, coffeeGroup, teaDrinksGroup, drinkOfTheWeekGroup},
+		OptionGroups: optionGroups,
 	}
 
 	attachment.Actions = []slack.AttachmentAction{menuAction}

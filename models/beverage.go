@@ -127,3 +127,26 @@ func BeveragesByCategory(category string) []Beverage {
 	db.Where(&Beverage{Category: category, DefaultDrink: true}).Find(&result)
 	return result
 }
+
+// AllBeveragesByCategory fetches all default beverages by category
+func AllBeveragesByCategory() (result map[string][]Beverage) {
+	var rows []Beverage
+
+	db.Table("beverages").
+		Select("beverages.id as ID, beverages.name as Name, beverages.category as Category").
+		Where(&Beverage{DefaultDrink: true}).
+		Group("id, category").
+		Order("category, name").
+		Find(&rows)
+
+	result = make(map[string][]Beverage)
+	for _, bev := range rows {
+		category := bev.Category
+		if result[category] == nil {
+			result[category] = []Beverage{}
+		}
+		result[category] = append(result[category], bev)
+	}
+
+	return
+}
