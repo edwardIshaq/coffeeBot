@@ -11,7 +11,6 @@ var db *gorm.DB
 func SetDatabase(database *gorm.DB) {
 	db = database
 	db.LogMode(true)
-	db.DropTable(&Beverage{})
 	setupTables()
 	saveAllDrinksToDB()
 }
