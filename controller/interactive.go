@@ -63,7 +63,6 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 			data, _ := json.Marshal(params)
 			bodyReader := bytes.NewReader(data)
 			req, err := http.NewRequest(http.MethodPost, responseURL, bodyReader)
-			fmt.Println("Request\n", req)
 
 			//Fire the request
 			resp, err := slack.HTTPClient.Do(req)

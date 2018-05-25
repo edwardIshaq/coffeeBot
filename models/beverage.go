@@ -99,7 +99,6 @@ func BeverageByID(id string) Beverage {
 func BeveragesForUser(userID string) []Beverage {
 	bevs := []Beverage{}
 	db.Where(&Beverage{UserID: userID}).Find(&bevs)
-	fmt.Println(bevs)
 	return bevs
 }
 

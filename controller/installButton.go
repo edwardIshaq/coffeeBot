@@ -45,9 +45,6 @@ func (installer *appInstaller) oAuthRedirectHandler(w http.ResponseWriter, r *ht
 	code := r.FormValue("code")
 	oauthResponse, err := slack.GetOAuthResponseContext(context.Background(), installer.slackClientID, installer.slackClientSecret, code, installer.redirectURL(), false)
 
-	fmt.Println()
-	fmt.Printf("oauthResponse: \n%v", oauthResponse)
-	fmt.Println()
 	message := "Something wrong happened"
 	if err == nil {
 		installer.OAuthResponse = *oauthResponse

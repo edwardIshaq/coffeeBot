@@ -32,10 +32,6 @@ func registerPermissionsRequestsRoutes() {
 }
 
 func handleScopeRequests(w http.ResponseWriter, r *http.Request) {
-	fmt.Println()
-	fmt.Printf("called handleScopeRequests %s\n", r.RequestURI)
-	fmt.Printf("Passed PostForm: %v", r.PostForm)
-
 	var scopes string
 	var apiURL string
 
@@ -52,10 +48,6 @@ func handleScopeRequests(w http.ResponseWriter, r *http.Request) {
 		scopes = userScopes
 		apiURL = permissionUserDataAPI
 	}
-
-	fmt.Println()
-	fmt.Printf("request scopes: %s, using api: %s", scopes, apiURL)
-	fmt.Println()
 
 	triggerID := r.PostFormValue("trigger_id")
 	userID := r.PostFormValue("user_id")
@@ -76,7 +68,6 @@ func requestScopes(userID, triggerID, accessToken, scopes, endpoint string) {
 		"trigger_id":  {triggerID},
 		"did_confirm": {"false"},
 	}
-	fmt.Printf("\npostBody = %v\n", postBody)
 	reqBody := strings.NewReader(postBody.Encode())
 	req, err := http.NewRequest("POST", slack.SLACK_API+endpoint, reqBody)
 	if err != nil {
