@@ -44,11 +44,10 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 
 	switch callbackID {
 	case "beverage_selection":
-		fmt.Println("interacted with `menu`")
 		if len(actionCallback.Actions) >= 1 {
 			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
-				chosenBeverage := actionCallback.Actions[0].SelectedOptions[0].Value
-				postDialog(chosenBeverage, actionCallback.TriggerID, token)
+				beverageSelectionID := actionCallback.Actions[0].SelectedOptions[0].Value
+				postDialog(beverageSelectionID, actionCallback.TriggerID, token)
 			}
 		}
 		return
