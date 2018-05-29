@@ -58,24 +58,14 @@ type PayloadResponse struct {
 
 // FeedbackMessage generates a slack feedback message for the chose beverage
 func (b Beverage) FeedbackMessage() *slack.Msg {
-	bevInfo := make(map[string]string)
-	bevInfo["Name"] = b.Name
-	bevInfo["Category"] = b.Category
-	bevInfo["Cup size"] = b.CupType
-	bevInfo["Espresso"] = b.Espresso
-	bevInfo["Syrup"] = b.Syrup
-	bevInfo["Temperture"] = b.Temperture
-	bevInfo["Comment"] = b.Comment
-
-	fields := []slack.AttachmentField{}
-	for key, value := range bevInfo {
-		fields = append(fields,
-			slack.AttachmentField{
-				Title: key,
-				Value: value,
-			},
-		)
-	}
+	fields := &[]slack.AttachmentField{}
+	appendFieldIfNotEmpty(fields, "Name", b.Name)
+	appendFieldIfNotEmpty(fields, "Category", b.Category)
+	appendFieldIfNotEmpty(fields, "Cup size", b.CupType)
+	appendFieldIfNotEmpty(fields, "Espresso", b.Espresso)
+	appendFieldIfNotEmpty(fields, "Syrup", b.Syrup)
+	appendFieldIfNotEmpty(fields, "Temperture", b.Temperture)
+	appendFieldIfNotEmpty(fields, "Comment", b.Comment)
 
 	params := &slack.Msg{
 		// Timestamp: d.ActionTs,
@@ -83,7 +73,7 @@ func (b Beverage) FeedbackMessage() *slack.Msg {
 			slack.Attachment{
 				// Text:   b.Name,
 				Color:  "#eaca67",
-				Fields: fields,
+				Fields: *fields,
 			},
 			slack.Attachment{
 				Text:       "Confirm your here to pickup your order",
@@ -100,4 +90,13 @@ func (b Beverage) FeedbackMessage() *slack.Msg {
 		},
 	}
 	return params
+}
+
+func appendFieldIfNotEmpty(fields *[]slack.AttachmentField, title, value string) {
+	if len(value) > 0 {
+		*fields = append(*fields, slack.AttachmentField{
+			Title: title,
+			Value: value,
+		})
+	}
 }
