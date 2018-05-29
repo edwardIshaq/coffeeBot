@@ -1,6 +1,8 @@
 package models
 
 import (
+	"fmt"
+
 	"github.com/nlopes/slack"
 )
 
@@ -146,7 +148,7 @@ func (b Beverage) MakeDialog() Dialog {
 	commentInput := NewTextAreaInput("Comment", "Comments", b.Comment)
 	commentInput.Optional = true
 
-	callbackID := "barista.dialog." + string(b.ID)
+	callbackID := fmt.Sprintf("barista.dialog.%d", b.ID)
 
 	dialog := Dialog{
 		CallbackID:  callbackID,

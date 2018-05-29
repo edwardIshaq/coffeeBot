@@ -12,7 +12,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -54,31 +53,9 @@ func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	//Process callback to extract `barista.dialog.<chosenBev>`
 	callbackID := actionCallback.CallbackID
-	chosenBev := ""
-	if strings.HasPrefix(actionCallback.CallbackID, "barista.dialog.") {
-		callbackID = "barista.dialog"
-		chosenBev = strings.Split(actionCallback.CallbackID, ".")[2]
-	}
-
-	dialogResponse := models.DialogSubmitCallback{}
-	json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
-	responseURL := dialogResponse.ResponseURL
 
 	switch callbackID {
-	case "barista.dialog":
-		dialogResponse := models.DialogSubmitCallback{}
-		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
-		// save beverage and post feedback message
-		newBeverage := dialogResponse.SaveNewBeverage(chosenBev)
-		if newBeverage == nil {
-			log.Println("Failed to save a new beverage")
-			return
-		}
-		params := newBeverage.FeedbackMessage()
-		replyMessage(params, responseURL)
-
 	case "saveOrder":
 		fmt.Println()
 		payload := r.PostFormValue("payload")
