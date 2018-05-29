@@ -81,8 +81,8 @@ func (b Beverage) FeedbackMessage() *slack.Msg {
 				Actions: []slack.AttachmentAction{
 					slack.AttachmentAction{
 						Type:  "button",
-						Name:  "confirm_order_name",
 						Text:  "Confirm",
+						Name:  "confirm_order",
 						Value: "confirm_order",
 					},
 				},
