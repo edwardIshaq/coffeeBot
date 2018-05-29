@@ -55,3 +55,49 @@ type PayloadResponse struct {
 	User              slack.User `json:"user"`
 	VerificationToken string     `json:"token"`
 }
+
+// FeedbackMessage generates a slack feedback message for the chose beverage
+func (b Beverage) FeedbackMessage() *slack.Msg {
+	bevInfo := make(map[string]string)
+	bevInfo["Name"] = b.Name
+	bevInfo["Category"] = b.Category
+	bevInfo["Cup size"] = b.CupType
+	bevInfo["Espresso"] = b.Espresso
+	bevInfo["Syrup"] = b.Syrup
+	bevInfo["Temperture"] = b.Temperture
+	bevInfo["Comment"] = b.Comment
+
+	fields := []slack.AttachmentField{}
+	for key, value := range bevInfo {
+		fields = append(fields,
+			slack.AttachmentField{
+				Title: key,
+				Value: value,
+			},
+		)
+	}
+
+	params := &slack.Msg{
+		// Timestamp: d.ActionTs,
+		Attachments: []slack.Attachment{
+			slack.Attachment{
+				// Text:   b.Name,
+				Color:  "#eaca67",
+				Fields: fields,
+			},
+			slack.Attachment{
+				Text:       "Confirm your here to pickup your order",
+				CallbackID: "saveOrder",
+				Actions: []slack.AttachmentAction{
+					slack.AttachmentAction{
+						Type:  "button",
+						Name:  "confirm_order_name",
+						Text:  "Confirm",
+						Value: "confirm_order",
+					},
+				},
+			},
+		},
+	}
+	return params
+}

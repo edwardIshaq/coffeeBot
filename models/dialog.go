@@ -59,13 +59,15 @@ type DialogSubmitCallback struct {
 	ResponseURL string        `json:"response_url"`
 }
 
+// SaveNewBeverage saves a new beverage from the dialog submission
+func (d DialogSubmitCallback) SaveNewBeverage(chosenBevID string) *Beverage {
+	templateBeverage := BeverageByID(chosenBevID)
+	return saveBeverage(d.Submission, d.User.ID, templateBeverage)
+}
+
 // FeedbackMessage reply to dialog with an attachment message
 func (d DialogSubmitCallback) FeedbackMessage(chosenBevID string) *slack.Msg {
 	templateBeverage := BeverageByID(chosenBevID)
-
-	go func(d DialogSubmitCallback) {
-		saveBeverage(d.Submission, d.User.ID, templateBeverage)
-	}(d)
 
 	fields := []slack.AttachmentField{}
 	for key, value := range d.Submission {

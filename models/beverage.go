@@ -60,7 +60,7 @@ func setField(obj interface{}, name string, value interface{}) error {
 /*
 map[Comment: CupType:8oz paper Espresso:single Syrup:Lavender Temperture:hot]
 */
-func saveBeverage(submission map[string]string, userID string, templateBeverage Beverage) {
+func saveBeverage(submission map[string]string, userID string, templateBeverage Beverage) *Beverage {
 	//override templateBeverage with submission fields
 	var err error
 	for k, v := range submission {
@@ -72,7 +72,7 @@ func saveBeverage(submission map[string]string, userID string, templateBeverage 
 
 	if err != nil {
 		fmt.Printf("\nError creating `Beverage`: %v", err)
-		return
+		return nil
 	}
 
 	//Override defaults
@@ -80,6 +80,7 @@ func saveBeverage(submission map[string]string, userID string, templateBeverage 
 	templateBeverage.UserID = userID
 	templateBeverage.DefaultDrink = false
 	db.Create(&templateBeverage)
+	return &templateBeverage
 }
 
 // BeverageByID finds a beverage by ID (string)

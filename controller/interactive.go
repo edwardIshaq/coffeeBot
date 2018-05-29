@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -42,11 +43,24 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 		chosenBev = strings.Split(actionCallback.CallbackID, ".")[2]
 	}
 
+	dialogResponse := models.DialogSubmitCallback{}
+	json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
+	responseURL := dialogResponse.ResponseURL
+
 	switch callbackID {
 	case "beverage_selection":
 		if len(actionCallback.Actions) >= 1 {
 			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
 				beverageSelectionID := actionCallback.Actions[0].SelectedOptions[0].Value
+
+				//Check if its a user defined beverage
+				presetBeverage := models.BeverageByID(beverageSelectionID)
+				if !presetBeverage.DefaultDrink {
+					//if it is send a feedback message
+					params := presetBeverage.FeedbackMessage()
+					replyMessage(params, responseURL)
+					return
+				}
 				postDialog(beverageSelectionID, actionCallback.TriggerID, token)
 			}
 		}
@@ -55,28 +69,34 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	case "barista.dialog":
 		dialogResponse := models.DialogSubmitCallback{}
 		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
-		responseURL := dialogResponse.ResponseURL
-		params := dialogResponse.FeedbackMessage(chosenBev)
-
-		go func(params *slack.Msg, responseURL string) {
-			data, _ := json.Marshal(params)
-			bodyReader := bytes.NewReader(data)
-			req, err := http.NewRequest(http.MethodPost, responseURL, bodyReader)
-
-			//Fire the request
-			resp, err := slack.HTTPClient.Do(req)
-			if err != nil {
-				fmt.Println("\nResponseError: ", err)
-				return
-			}
-			defer resp.Body.Close()
-		}(params, responseURL)
+		// save beverage and post feedback message
+		newBeverage := dialogResponse.SaveNewBeverage(chosenBev)
+		if newBeverage == nil {
+			log.Println("Failed to save a new beverage")
+			return
+		}
+		params := newBeverage.FeedbackMessage()
+		replyMessage(params, responseURL)
 
 	case "saveOrder":
 		fmt.Println()
 		payload := r.PostFormValue("payload")
 		fmt.Printf("payload= %v\n", payload)
 	}
+}
+
+func replyMessage(params *slack.Msg, responseURL string) {
+	data, _ := json.Marshal(params)
+	bodyReader := bytes.NewReader(data)
+	req, err := http.NewRequest(http.MethodPost, responseURL, bodyReader)
+
+	//Fire the request
+	resp, err := slack.HTTPClient.Do(req)
+	if err != nil {
+		fmt.Println("\nResponseError: ", err)
+		return
+	}
+	defer resp.Body.Close()
 }
 
 func postDialog(chosenBeverage, triggerID, token string) {
