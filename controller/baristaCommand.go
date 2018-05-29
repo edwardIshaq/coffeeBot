@@ -128,5 +128,6 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request) {
 		replyMessage(params, actionCallback.ResponseURL)
 		return
 	}
-	postDialog(beverageSelectionID, actionCallback.TriggerID, token)
+	dialog := presetBeverage.MakeDialog()
+	postDialog(dialog, actionCallback.TriggerID, token)
 }

@@ -100,9 +100,7 @@ func replyMessage(params *slack.Msg, responseURL string) {
 	defer resp.Body.Close()
 }
 
-func postDialog(chosenBeverage, triggerID, token string) {
-	dialog := makeDialog(chosenBeverage)
-
+func postDialog(dialog models.Dialog, triggerID, token string) {
 	if dialogjson, err := json.Marshal(dialog); err == nil {
 		postBody := url.Values{
 			"token":      {token},
@@ -138,41 +136,6 @@ func postDialog(chosenBeverage, triggerID, token string) {
 			fmt.Println("\nbodyString: ", bodyString)
 		}
 	}
-}
-
-func makeDialog(chosenBeverage string) models.Dialog {
-	presetBeverage := models.BeverageByID(chosenBeverage)
-
-	cupMenu := models.NewStaticSelectDialogInput("CupType", "Drink Size", models.AllDrinkSizes())
-	cupMenu.Value = presetBeverage.CupType
-
-	espressMenu := models.NewStaticSelectDialogInput("Espresso", "Espresso Options", models.AllEspressoOptions())
-	espressMenu.Value = presetBeverage.Espresso
-
-	syrupMenu := models.NewStaticSelectDialogInput("Syrup", "Syrup", models.AllSyrupOptions())
-	syrupMenu.Value = presetBeverage.Syrup
-
-	tempMenu := models.NewStaticSelectDialogInput("Temperture", "Temperture", models.AllTemps())
-	tempMenu.Value = presetBeverage.Temperture
-
-	commentInput := models.NewTextAreaInput("Comment", "Comments", presetBeverage.Comment)
-	commentInput.Optional = true
-
-	callbackID := "barista.dialog." + chosenBeverage
-
-	dialog := models.Dialog{
-		CallbackID:  callbackID,
-		Title:       models.DialogTitle(presetBeverage.Name),
-		SubmitLabel: "Order",
-		Elements: []interface{}{
-			cupMenu,
-			espressMenu,
-			syrupMenu,
-			tempMenu,
-			commentInput,
-		},
-	}
-	return dialog
 }
 
 func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallback {

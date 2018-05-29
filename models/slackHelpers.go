@@ -128,3 +128,37 @@ func (d DialogSubmitCallback) FeedbackMessage(chosenBevID string) *slack.Msg {
 	}
 	return params
 }
+
+// MakeDialog creates a new dialog from the `Beverage`
+func (b Beverage) MakeDialog() Dialog {
+	cupMenu := NewStaticSelectDialogInput("CupType", "Drink Size", AllDrinkSizes())
+	cupMenu.Value = b.CupType
+
+	espressMenu := NewStaticSelectDialogInput("Espresso", "Espresso Options", AllEspressoOptions())
+	espressMenu.Value = b.Espresso
+
+	syrupMenu := NewStaticSelectDialogInput("Syrup", "Syrup", AllSyrupOptions())
+	syrupMenu.Value = b.Syrup
+
+	tempMenu := NewStaticSelectDialogInput("Temperture", "Temperture", AllTemps())
+	tempMenu.Value = b.Temperture
+
+	commentInput := NewTextAreaInput("Comment", "Comments", b.Comment)
+	commentInput.Optional = true
+
+	callbackID := "barista.dialog." + string(b.ID)
+
+	dialog := Dialog{
+		CallbackID:  callbackID,
+		Title:       DialogTitle(b.Name),
+		SubmitLabel: "Order",
+		Elements: []interface{}{
+			cupMenu,
+			espressMenu,
+			syrupMenu,
+			tempMenu,
+			commentInput,
+		},
+	}
+	return dialog
+}
