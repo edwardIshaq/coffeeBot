@@ -2,14 +2,35 @@ package controller
 
 import (
 	"SlackPlatform/crossfunction"
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"net/http"
+	"regexp"
 
 	"github.com/nlopes/slack"
 )
 
 type slashCommand struct {
-	name string
+	// user will invoke `/<slashCommand>` to call this function
+	slashCommand string
+	// command will generate an interactive component with `callbackID` callback
+	callbackID string
+	//Regex to match against callbacks
+	callbackRegex *regexp.Regexp
+}
+
+func baristaCommand() *slashCommand {
+	callbackID := "beverage_selection"
+	regex, _ := regexp.Compile(callbackID)
+	return &slashCommand{
+		slashCommand:  "coffeeCommand",
+		callbackID:    callbackID,
+		callbackRegex: regex,
+	}
+}
+
+func (s *slashCommand) canHandleCallback(callback string) bool {
+	return s.callbackRegex.MatchString(callback)
 }
 
 func (s *slashCommand) registerRoutes() {
@@ -20,21 +41,21 @@ func (s *slashCommand) registerRoutes() {
 		}
 
 		api = crossfunction.ClientForRequest(r)
-		s.handleCoffeeCommand(w, r)
+		s.respondToCommand(w, r)
 	})
 }
 
 func (s *slashCommand) route() string {
-	return "/" + s.name
+	return "/" + s.slashCommand
 }
 
-func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Request) {
+func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) {
 	channelID := r.PostFormValue("channel_id")
 	attachment := slack.Attachment{}
 	attachment.Text = "Choose a beverage"
 	attachment.Fallback = "Choose a beverage from the menu"
 	attachment.Color = "#3AA3E3"
-	attachment.CallbackID = "beverage_selection"
+	attachment.CallbackID = s.callbackID
 
 	//User Beverages
 	userID := r.PostFormValue("user_id")
@@ -77,4 +98,35 @@ func (s *slashCommand) handleCoffeeCommand(w http.ResponseWriter, r *http.Reques
 func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
 	bevsMap := models.MenuMap(bevs)
 	return models.MakeAttachmentOptionsFromMap(bevsMap)
+}
+
+func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	token, ok := middleware.AccessToken(r.Context())
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	//Process callback to extract `barista.dialog.<chosenBev>`
+	actionCallback := parseAttachmentActionCallback(r)
+
+	if len(actionCallback.Actions) < 1 {
+		return
+	}
+	if len(actionCallback.Actions[0].SelectedOptions) < 1 {
+		return
+	}
+
+	beverageSelectionID := actionCallback.Actions[0].SelectedOptions[0].Value
+	//Check if its a user defined beverage
+	presetBeverage := models.BeverageByID(beverageSelectionID)
+	if !presetBeverage.DefaultDrink {
+		//if it is send a feedback message
+		params := presetBeverage.FeedbackMessage()
+		replyMessage(params, actionCallback.ResponseURL)
+		return
+	}
+	postDialog(beverageSelectionID, actionCallback.TriggerID, token)
 }

@@ -6,7 +6,6 @@ TODO:
 	Probably should look under `payload`
 */
 import (
-	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"bytes"
 	"context"
@@ -21,21 +20,41 @@ import (
 	"github.com/nlopes/slack"
 )
 
-type interactive struct{}
-
-func (i interactive) registerRoutes() {
-	http.HandleFunc("/interactive", handleInteractiveMessages)
+type interactive struct {
+	components []interactiveComponent
 }
 
-func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
-	token, ok := middleware.AccessToken(r.Context())
-	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
+func (i *interactive) addComponent(comp interactiveComponent) {
+	i.components = append(i.components, comp)
+}
+
+type interactiveComponent interface {
+	canHandleCallback(string) bool
+	handleCallback(http.ResponseWriter, *http.Request)
+}
+
+func (i *interactive) registerRoutes() {
+	http.HandleFunc("/interactive", i.handleInteractiveMessages)
+}
+
+func (i *interactive) callbackHandler(callbackID string) interactiveComponent {
+	for _, comp := range i.components {
+		if comp.canHandleCallback(callbackID) {
+			return comp
+		}
+	}
+	return nil
+}
+
+func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
+	// Scan `components` to see who can hanle this callbackID
+	actionCallback := parseAttachmentActionCallback(r)
+	if comp := i.callbackHandler(actionCallback.CallbackID); comp != nil {
+		comp.handleCallback(w, r)
 		return
 	}
 
 	//Process callback to extract `barista.dialog.<chosenBev>`
-	actionCallback := parseAttachmentActionCallback(r)
 	callbackID := actionCallback.CallbackID
 	chosenBev := ""
 	if strings.HasPrefix(actionCallback.CallbackID, "barista.dialog.") {
@@ -48,24 +67,6 @@ func handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	responseURL := dialogResponse.ResponseURL
 
 	switch callbackID {
-	case "beverage_selection":
-		if len(actionCallback.Actions) >= 1 {
-			if len(actionCallback.Actions[0].SelectedOptions) >= 1 {
-				beverageSelectionID := actionCallback.Actions[0].SelectedOptions[0].Value
-
-				//Check if its a user defined beverage
-				presetBeverage := models.BeverageByID(beverageSelectionID)
-				if !presetBeverage.DefaultDrink {
-					//if it is send a feedback message
-					params := presetBeverage.FeedbackMessage()
-					replyMessage(params, responseURL)
-					return
-				}
-				postDialog(beverageSelectionID, actionCallback.TriggerID, token)
-			}
-		}
-		return
-
 	case "barista.dialog":
 		dialogResponse := models.DialogSubmitCallback{}
 		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)

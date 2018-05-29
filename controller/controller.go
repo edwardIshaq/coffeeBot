@@ -22,17 +22,18 @@ import (
 )
 
 var (
-	installer      *appInstaller
-	baristaCommand slashCommand
-	interact       interactive
-	db             *gorm.DB
-	api            *slack.Client
+	installer    *appInstaller
+	slashBarista *slashCommand
+	interact     *interactive
+	db           *gorm.DB
+	api          *slack.Client
 )
 
 func init() {
 	installer = defaultApp()
-	baristaCommand = slashCommand{"coffeeCommand"}
-	interact = interactive{}
+	slashBarista = baristaCommand()
+	interact = &interactive{}
+	interact.addComponent(slashBarista)
 }
 
 // StartupControllers call this function to setup the controllers
@@ -44,6 +45,6 @@ func StartupControllers(gormDB *gorm.DB) {
 	registerPermissionsRequestsRoutes()
 
 	installer.registerRoutes()
-	baristaCommand.registerRoutes()
+	slashBarista.registerRoutes()
 	interact.registerRoutes()
 }
