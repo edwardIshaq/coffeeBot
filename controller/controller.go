@@ -25,6 +25,7 @@ var (
 	installer     *appInstaller
 	slashBarista  *slashCommand
 	dialogHandler *dialogInteraction
+	saveBevAction *saveBeverageInteraction
 	interact      *interactive
 	db            *gorm.DB
 	api           *slack.Client
@@ -32,11 +33,16 @@ var (
 
 func init() {
 	installer = defaultApp()
-	slashBarista = baristaCommand()
-	dialogHandler = beverageDialogInteraction()
 	interact = &interactive{}
+
+	slashBarista = baristaCommand()
 	interact.addComponent(slashBarista)
+
+	dialogHandler = beverageDialogInteraction()
 	interact.addComponent(dialogHandler)
+
+	saveBevAction = saveBevInteraction()
+	interact.addComponent(saveBevAction)
 }
 
 // StartupControllers call this function to setup the controllers

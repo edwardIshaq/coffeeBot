@@ -52,6 +52,7 @@ func (b Beverage) FeedbackMessage() *slack.Msg {
 	appendFieldIfNotEmpty(fields, "Temperture", b.Temperture)
 	appendFieldIfNotEmpty(fields, "Comment", b.Comment)
 
+	saveActionValue := fmt.Sprintf("save_beverage.%d", b.ID)
 	params := &slack.Msg{
 		// Timestamp: d.ActionTs,
 		Attachments: []slack.Attachment{
@@ -62,13 +63,19 @@ func (b Beverage) FeedbackMessage() *slack.Msg {
 			},
 			slack.Attachment{
 				Text:       "Confirm your here to pickup your order",
-				CallbackID: "saveOrder",
+				CallbackID: "order_created",
 				Actions: []slack.AttachmentAction{
 					slack.AttachmentAction{
 						Type:  "button",
 						Text:  "Confirm",
 						Name:  "confirm_order",
 						Value: "confirm_order",
+					},
+					slack.AttachmentAction{
+						Type:  "button",
+						Text:  "Save Your Drink",
+						Name:  "save_beverage",
+						Value: saveActionValue,
 					},
 				},
 			},
@@ -145,8 +152,10 @@ func (b Beverage) MakeDialog() Dialog {
 	tempMenu := NewStaticSelectDialogInput("Temperture", "Temperture", AllTemps())
 	tempMenu.Value = b.Temperture
 
-	commentInput := NewTextAreaInput("Comment", "Comments", b.Comment)
-	commentInput.Optional = true
+	milkMenu := NewStaticSelectDialogInput("Milk", "Milk", AllMilkOptions())
+	milkMenu.Value = b.Milk
+	// commentInput := NewTextAreaInput("Comment", "Comments", b.Comment)
+	// commentInput.Optional = true
 
 	callbackID := fmt.Sprintf("barista.dialog.%d", b.ID)
 
@@ -159,8 +168,23 @@ func (b Beverage) MakeDialog() Dialog {
 			espressMenu,
 			syrupMenu,
 			tempMenu,
-			commentInput,
+			milkMenu,
+			// commentInput,
 		},
 	}
 	return dialog
+}
+
+// MakeSaveNameDialog to save a custom title for the drink
+func (b Beverage) MakeSaveNameDialog() Dialog {
+	callbackID := fmt.Sprintf("saveBeverageNAme.%d", b.ID)
+
+	return Dialog{
+		CallbackID:  callbackID,
+		Title:       fmt.Sprintf("Save Drink"),
+		SubmitLabel: "Save",
+		Elements: []DialogElement{
+			NewTextInput("drinkName", "Drink Name"),
+		},
+	}
 }
