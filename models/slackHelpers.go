@@ -154,7 +154,7 @@ func (b Beverage) MakeDialog() Dialog {
 		CallbackID:  callbackID,
 		Title:       DialogTitle(b.Name),
 		SubmitLabel: "Order",
-		Elements: []interface{}{
+		Elements: []DialogElement{
 			cupMenu,
 			espressMenu,
 			syrupMenu,

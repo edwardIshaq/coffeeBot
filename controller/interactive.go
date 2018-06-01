@@ -111,6 +111,9 @@ func postDialog(dialog models.Dialog, triggerID, token string) {
 			}
 			bodyString := string(bodyBytes)
 			fmt.Println("\nbodyString: ", bodyString)
+			resp := &models.DialogOpenResponse{}
+			json.Unmarshal(bodyBytes, &resp)
+			fmt.Printf("\n\nDialogOpenResponse: %v\n\n", resp)
 		}
 	}
 }

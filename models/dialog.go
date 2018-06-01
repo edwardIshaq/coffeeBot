@@ -7,13 +7,16 @@ import (
 // Dialog as in Slack dialogs
 // 	https://api.slack.com/dialogs#option_element_attributes#top-level_dialog_attributes
 type Dialog struct {
-	TriggerID      string        `json:"trigger_id,omitempty"`
-	CallbackID     string        `json:"callback_id"`
-	NotifyOnCancel bool          `json:"notify_on_cancel"`
-	Title          string        `json:"title"`
-	SubmitLabel    string        `json:"submit_label,omitempty"`
-	Elements       []interface{} `json:"elements"`
+	TriggerID      string          `json:"trigger_id,omitempty"`
+	CallbackID     string          `json:"callback_id"`
+	NotifyOnCancel bool            `json:"notify_on_cancel"`
+	Title          string          `json:"title"`
+	SubmitLabel    string          `json:"submit_label,omitempty"`
+	Elements       []DialogElement `json:"elements"`
 }
+
+// DialogElement Abstract interface for Elements
+type DialogElement interface{}
 
 // DialogInput for dialogs input type text or menu
 type DialogInput struct {
@@ -57,4 +60,16 @@ type DialogSubmitCallback struct {
 	ActionTs    string        `json:"action_ts"`
 	Token       string        `json:"token"`
 	ResponseURL string        `json:"response_url"`
+}
+
+// DialogOpenResponse response from `dialog.open`
+type DialogOpenResponse struct {
+	Ok               bool             `json:"ok"`
+	Error            string           `json:"error"`
+	ResponseMetadata ResponseMetadata `json:"response_metadata"`
+}
+
+// ResponseMetadata lists the error messages
+type ResponseMetadata struct {
+	Messages []string `json:"messages"`
 }
