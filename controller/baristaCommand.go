@@ -100,7 +100,7 @@ func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) 
 	postParams.Attachments = []slack.Attachment{attachment}
 	postParams.Channel = channelID
 
-	api.PostMessage(channelID, "Choose a beverage", postParams)
+	api.PostMessage(channelID, "Please select a beverage from the menu below", postParams)
 }
 
 func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
