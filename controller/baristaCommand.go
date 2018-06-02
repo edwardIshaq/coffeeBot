@@ -58,10 +58,11 @@ func (s *slashCommand) route() string {
 
 func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) {
 	channelID := r.PostFormValue("channel_id")
-	attachment := slack.Attachment{}
-	attachment.Text = "Choose a beverage"
-	attachment.Fallback = "Choose a beverage from the menu"
-	attachment.Color = "#3AA3E3"
+	attachment := slack.Attachment{
+		Fallback:   "Choose a beverage from the menu",
+		Color:      "#3AA3E3",
+		CallbackID: s.callbackID,
+	}
 	attachment.CallbackID = s.callbackID
 
 	//User Beverages
@@ -99,7 +100,7 @@ func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) 
 	postParams.Attachments = []slack.Attachment{attachment}
 	postParams.Channel = channelID
 
-	api.PostMessage(channelID, "choose a beverage", postParams)
+	api.PostMessage(channelID, "Choose a beverage", postParams)
 }
 
 func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
