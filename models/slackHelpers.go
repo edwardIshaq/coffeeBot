@@ -177,14 +177,15 @@ func (b Beverage) MakeDialog() Dialog {
 
 // MakeSaveNameDialog to save a custom title for the drink
 func (b Beverage) MakeSaveNameDialog() Dialog {
-	callbackID := fmt.Sprintf("saveBeverageNAme.%d", b.ID)
+	callbackID := fmt.Sprintf("saveBeverageName.%d", b.ID)
 
 	return Dialog{
 		CallbackID:  callbackID,
 		Title:       fmt.Sprintf("Save Drink"),
 		SubmitLabel: "Save",
 		Elements: []DialogElement{
-			NewTextInput("drinkName", "Drink Name"),
+			NewTextInput("drinkName", "Drink Name", b.Name),
+			NewTextAreaInput("comment", "Comments", b.Comment),
 		},
 	}
 }

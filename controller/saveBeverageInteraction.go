@@ -3,6 +3,7 @@ package controller
 import (
 	"SlackPlatform/middleware"
 	"SlackPlatform/models"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -22,8 +23,7 @@ type saveBeverageInteraction struct {
 
 func saveBevInteraction() *saveBeverageInteraction {
 	callbackID := "order_created"
-	regex, _ := regexp.Compile(callbackID)
-
+	regex, _ := regexp.Compile(`order_created|saveBeverageName\.(\d*)`)
 	return &saveBeverageInteraction{
 		callbackID:    callbackID,
 		callbackRegex: regex,
@@ -42,12 +42,13 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 	}
 
 	actionCallback := parseAttachmentActionCallback(r)
-	fmt.Printf("\n actionCallback = %v \n", actionCallback)
-
-	// saveActionValue := fmt.Sprintf("save_beverage.%d", b.ID)
-
 	if len(actionCallback.Actions) < 1 {
-		fmt.Println("There is no Actions, the impossible happened")
+		dialogResponse := models.DialogSubmitCallback{}
+		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
+		if len(dialogResponse.Submission) > 0 {
+			d.handleSaveNameCallback(w, r, dialogResponse)
+			return
+		}
 		return
 	}
 
@@ -61,4 +62,20 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 	presetBeverage := models.BeverageByID(chosenBevID)
 	dialog := presetBeverage.MakeSaveNameDialog()
 	postDialog(dialog, actionCallback.TriggerID, token)
+}
+
+func (d *saveBeverageInteraction) handleSaveNameCallback(w http.ResponseWriter,
+	r *http.Request,
+	submitCallback models.DialogSubmitCallback) {
+	matches := d.callbackRegex.FindStringSubmatch(submitCallback.CallbackID)
+	if len(matches) < 2 {
+		fmt.Println("no matches", matches)
+		return
+	}
+	beverageID := matches[1]
+	bev := models.BeverageByID(beverageID)
+	drinkName := submitCallback.Submission["drinkName"]
+	comment := submitCallback.Submission["comment"]
+	bev.UpdateDrink(drinkName, comment)
+	w.WriteHeader(http.StatusOK)
 }

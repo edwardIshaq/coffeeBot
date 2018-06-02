@@ -83,6 +83,13 @@ func saveBeverage(submission map[string]string, userID string, templateBeverage 
 	return &templateBeverage
 }
 
+// UpdateDrink update the beverage name
+func (b *Beverage) UpdateDrink(name, comment string) {
+	db.Model(&b).
+		Update("name", name).
+		Update("comment", comment)
+}
+
 // BeverageByID finds a beverage by ID (string)
 func BeverageByID(id string) Beverage {
 	bevID, err := strconv.Atoi(id)

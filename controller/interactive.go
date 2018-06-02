@@ -53,14 +53,9 @@ func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	callbackID := actionCallback.CallbackID
-
-	switch callbackID {
-	case "saveOrder":
-		fmt.Println()
-		payload := r.PostFormValue("payload")
-		fmt.Printf("payload= %v\n", payload)
-	}
+	payload := r.PostFormValue("payload")
+	fmt.Printf("payload= %v\n", payload)
+	http.NotFound(w, r)
 }
 
 func replyMessage(params *slack.Msg, responseURL string) {

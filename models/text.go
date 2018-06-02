@@ -26,13 +26,14 @@ type TextInputElement struct {
 }
 
 // NewTextInput constructor for a `text` input
-func NewTextInput(name, label string) *TextInputElement {
+func NewTextInput(name, label, text string) *TextInputElement {
 	return &TextInputElement{
 		DialogInput: DialogInput{
 			Type:  InputTypeText,
 			Name:  name,
 			Label: label,
 		},
+		Value: text,
 	}
 }
 
