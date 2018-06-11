@@ -12,7 +12,9 @@ import (
 
 /*
 Todo:
-Rename the interactions to somethig shorter
+[ ] Rename the interactions to somethig shorter
+[ ] Display Drink Name in the title
+[ ] Show a confirmation after saving
 */
 type saveBeverageInteraction struct {
 	// command will generate an interactive component with `callbackID` callback
@@ -53,15 +55,24 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 	}
 
 	actionComponents := strings.Split(actionCallback.Actions[0].Value, ".")
-	if len(actionComponents) < 1 {
-		fmt.Println("There is no BevID")
+	if len(actionComponents) < 2 {
+		fmt.Printf("Expecting `<action>.<bevID>` format, instead got %s\n", actionCallback.Actions[0].Value)
 		return
 	}
+	action := actionComponents[0]
 	chosenBevID := actionComponents[1]
+	beverage := models.BeverageByID(chosenBevID)
 
-	presetBeverage := models.BeverageByID(chosenBevID)
-	dialog := presetBeverage.MakeSaveNameDialog()
-	postDialog(dialog, actionCallback.TriggerID, token)
+	switch action {
+	case "save_beverage":
+		dialog := beverage.MakeSaveNameDialog()
+		postDialog(dialog, actionCallback.TriggerID, token)
+
+	case "confirm_beverage":
+		fmt.Printf("Confirm order %v", beverage)
+
+	}
+
 }
 
 func (d *saveBeverageInteraction) handleSaveNameCallback(w http.ResponseWriter,

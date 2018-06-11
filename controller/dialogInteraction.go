@@ -31,8 +31,8 @@ func (d *dialogInteraction) canHandleCallback(callback string) bool {
 }
 
 func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Request) {
-	var chosenBev string
 	actionCallback := parseAttachmentActionCallback(r)
+	var chosenBev string
 	if strings.HasPrefix(actionCallback.CallbackID, "barista.dialog.") {
 		chosenBev = strings.Split(actionCallback.CallbackID, ".")[2]
 	}
