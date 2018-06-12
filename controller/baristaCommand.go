@@ -84,23 +84,18 @@ func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) 
 			})
 	}
 
-	menuAction := slack.AttachmentAction{
-		Name:         "beverage_menu",
-		Text:         "Select beverage",
-		Type:         "select",
-		OptionGroups: optionGroups,
+	attachment.Actions = []slack.AttachmentAction{
+		slack.AttachmentAction{
+			Name:         "beverage_menu",
+			Text:         "Select beverage",
+			Type:         "select",
+			OptionGroups: optionGroups,
+		},
 	}
 
-	attachment.Actions = []slack.AttachmentAction{menuAction}
-	message := slack.Message{}
-	message.Text = "What would you like to order ?"
-	message.Attachments = []slack.Attachment{attachment}
-
-	postParams := slack.NewPostMessageParameters()
-	postParams.Attachments = []slack.Attachment{attachment}
-	postParams.Channel = channelID
-
-	api.PostMessage(channelID, "Please select a beverage from the menu below", postParams)
+	attachmentOption := slack.MsgOptionAttachments(attachment)
+	textOption := slack.MsgOptionText("What would you like to order ?", false)
+	api.PostEphemeral(channelID, userID, textOption, attachmentOption)
 }
 
 func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
