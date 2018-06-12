@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	// "github.com/jinzhu/gorm"
-	"github.com/nlopes/slack"
+	"github.com/edwardIshaq/slack"
 )
 
 /*

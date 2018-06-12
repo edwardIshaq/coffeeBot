@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/nlopes/slack"
+	"github.com/edwardIshaq/slack"
 )
 
 // MakeAttachmentOptions converts an array of strings to slack menu options

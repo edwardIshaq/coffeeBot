@@ -1,7 +1,9 @@
-package models
+package slack
 
 import (
-	"github.com/edwardIshaq/slack"
+	"context"
+	"encoding/json"
+	"net/url"
 )
 
 // Dialog as in Slack dialogs
@@ -39,37 +41,50 @@ const (
 	InputTypeSelect InputType = "select"
 )
 
-// DialogTitle makes a title into a dialog title by caping it of to 24 chars
-func DialogTitle(title string) string {
-	const maxLength = 24
-	if len(title) < maxLength {
-		return title
-	}
-	return title[:21] + "..."
-}
-
 // DialogSubmitCallback to parse the response back from the Dialog
 type DialogSubmitCallback struct {
 	Type       string            `json:"type"`
 	Submission map[string]string `json:"submission"`
 	CallbackID string            `json:"callback_id"`
 
-	Team        slack.Team    `json:"team"`
-	Channel     slack.Channel `json:"channel"`
-	User        slack.User    `json:"user"`
-	ActionTs    string        `json:"action_ts"`
-	Token       string        `json:"token"`
-	ResponseURL string        `json:"response_url"`
+	Team        Team    `json:"team"`
+	Channel     Channel `json:"channel"`
+	User        User    `json:"user"`
+	ActionTs    string  `json:"action_ts"`
+	Token       string  `json:"token"`
+	ResponseURL string  `json:"response_url"`
 }
 
 // DialogOpenResponse response from `dialog.open`
 type DialogOpenResponse struct {
-	Ok               bool             `json:"ok"`
-	Error            string           `json:"error"`
-	ResponseMetadata ResponseMetadata `json:"response_metadata"`
+	Ok                     bool             `json:"ok"`
+	Error                  string           `json:"error"`
+	DialogResponseMetadata ResponseMetadata `json:"response_metadata"`
 }
 
-// ResponseMetadata lists the error messages
-type ResponseMetadata struct {
+// DialogResponseMetadata lists the error messages
+type DialogResponseMetadata struct {
 	Messages []string `json:"messages"`
+}
+
+// OpenDialog posts the `dialog` to slack's `Dialog.open` endpoint
+func (api *Client) OpenDialog(dialog Dialog) (err error) {
+	return api.OpenDialogContext(context.Background(), dialog)
+}
+
+// OpenDialogContext opens a dialog window where the triggerId originated from with a custom context
+func (api *Client) OpenDialogContext(ctx context.Context, dialog Dialog) (err error) {
+	dialogjson, err := json.Marshal(dialog)
+	if err != nil {
+		return
+	}
+
+	values := url.Values{
+		"token":      {api.token},
+		"trigger_id": {dialog.TriggerID},
+		"dialog":     {string(dialogjson)},
+	}
+
+	response := &DialogOpenResponse{}
+	return postForm(ctx, api.httpclient, "dialog.open", values, response, api.debug)
 }

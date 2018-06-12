@@ -16,7 +16,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/nlopes/slack"
+	"github.com/edwardIshaq/slack"
 )
 
 type interactive struct {

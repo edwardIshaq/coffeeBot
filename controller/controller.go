@@ -17,8 +17,8 @@ TODO:
 */
 
 import (
+	"github.com/edwardIshaq/slack"
 	"github.com/jinzhu/gorm"
-	"github.com/nlopes/slack"
 )
 
 var (

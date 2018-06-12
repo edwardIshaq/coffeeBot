@@ -1,8 +1,8 @@
 package models
 
 import (
+	"github.com/edwardIshaq/slack"
 	"github.com/jinzhu/gorm"
-	"github.com/nlopes/slack"
 )
 
 // Team is the slack representation of Workspace

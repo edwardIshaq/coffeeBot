@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nlopes/slack"
+	"github.com/edwardIshaq/slack"
 )
 
 var (

@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/nlopes/slack"
+	"github.com/edwardIshaq/slack"
 )
 
 type slashCommand struct {
