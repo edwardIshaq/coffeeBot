@@ -1,4 +1,4 @@
-package models
+package oldDialog
 
 // TextInputSubtype Accepts email, number, tel, or url. In some form factors, optimized input is provided for this subtype.
 type TextInputSubtype string

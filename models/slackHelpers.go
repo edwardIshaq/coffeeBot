@@ -93,74 +93,35 @@ func appendFieldIfNotEmpty(fields *[]slack.AttachmentField, title, value string)
 }
 
 // SaveNewBeverage saves a new beverage from the dialog submission
-func (d DialogSubmitCallback) SaveNewBeverage(chosenBevID string) *Beverage {
+func SaveNewBeverage(d slack.DialogSubmitCallback, chosenBevID string) *Beverage {
 	templateBeverage := BeverageByID(chosenBevID)
 	return saveBeverage(d.Submission, d.User.ID, templateBeverage)
 }
 
-// FeedbackMessage reply to dialog with an attachment message
-func (d DialogSubmitCallback) FeedbackMessage(chosenBevID string) *slack.Msg {
-	templateBeverage := BeverageByID(chosenBevID)
-
-	fields := []slack.AttachmentField{}
-	for key, value := range d.Submission {
-		fields = append(fields,
-			slack.AttachmentField{
-				Title: key,
-				Value: value,
-			},
-		)
-	}
-
-	params := &slack.Msg{
-		Timestamp: d.ActionTs,
-		Attachments: []slack.Attachment{
-			slack.Attachment{
-				Text:   templateBeverage.Name,
-				Color:  "#eaca67",
-				Fields: fields,
-			},
-			slack.Attachment{
-				Text:       "Would you like to Save your Order for next time?",
-				CallbackID: "saveOrder",
-				Actions: []slack.AttachmentAction{
-					slack.AttachmentAction{
-						Type:  "button",
-						Name:  "Save",
-						Text:  "Save",
-						Value: "SaveBeverage",
-					},
-				},
-			},
-		},
-	}
-	return params
-}
-
 // MakeDialog creates a new dialog from the `Beverage`
-func (b Beverage) MakeDialog() Dialog {
-	cupMenu := NewStaticSelectDialogInput("CupType", "Drink Size", AllDrinkSizes())
+func (b Beverage) MakeDialog() slack.Dialog {
+	cupMenu := slack.NewStaticSelectDialogInput("CupType", "Drink Size", stringsToSelectOptions(AllDrinkSizes()))
 	cupMenu.Value = b.CupType
 
-	espressMenu := NewStaticSelectDialogInput("Espresso", "Espresso Options", AllEspressoOptions())
+	espressMenu := slack.NewStaticSelectDialogInput("Espresso", "Espresso Options", stringsToSelectOptions(AllEspressoOptions()))
 	espressMenu.Value = b.Espresso
 
-	syrupMenu := NewStaticSelectDialogInput("Syrup", "Syrup", AllSyrupOptions())
+	syrupMenu := slack.NewStaticSelectDialogInput("Syrup", "Syrup", stringsToSelectOptions(AllSyrupOptions()))
 	syrupMenu.Value = b.Syrup
 
-	tempMenu := NewStaticSelectDialogInput("Temperture", "Temperture", AllTemps())
+	tempMenu := slack.NewStaticSelectDialogInput("Temperture", "Temperture", stringsToSelectOptions(AllTemps()))
 	tempMenu.Value = b.Temperture
 
-	milkMenu := NewStaticSelectDialogInput("Milk", "Milk", AllMilkOptions())
+	milkMenu := slack.NewStaticSelectDialogInput("Milk", "Milk", stringsToSelectOptions(AllMilkOptions()))
 	milkMenu.Value = b.Milk
 
 	callbackID := fmt.Sprintf("barista.dialog.%d", b.ID)
 
-	dialog := Dialog{
+	dialog := slack.Dialog{
 		CallbackID:  callbackID,
 		Title:       DialogTitle(b.Name),
 		SubmitLabel: "Order",
-		Elements: []DialogElement{
+		Elements: []slack.DialogElement{
 			cupMenu,
 			espressMenu,
 			syrupMenu,
@@ -171,19 +132,41 @@ func (b Beverage) MakeDialog() Dialog {
 	return dialog
 }
 
+type stringArray []string
+
+func stringsToSelectOptions(options []string) []slack.SelectOption {
+	selectOptions := make([]slack.SelectOption, len(options))
+	for idx, value := range options {
+		selectOptions[idx] = slack.SelectOption{
+			Label: value,
+			Value: value,
+		}
+	}
+	return selectOptions
+}
+
+// DialogTitle makes a title into a dialog title by caping it of to 24 chars
+func DialogTitle(title string) string {
+	const maxLength = 24
+	if len(title) < maxLength {
+		return title
+	}
+	return title[:21] + "..."
+}
+
 // MakeSaveNameDialog to save a custom title for the drink
-func (b Beverage) MakeSaveNameDialog() Dialog {
+func (b Beverage) MakeSaveNameDialog() slack.Dialog {
 	callbackID := fmt.Sprintf("saveBeverageName.%d", b.ID)
 
-	nameInput := NewTextInput("drinkName", "Drink Name", b.Name)
-	commentInput := NewTextAreaInput("comment", "Comments", b.Comment)
+	nameInput := slack.NewTextInput("drinkName", "Drink Name", b.Name)
+	commentInput := slack.NewTextAreaInput("comment", "Comments", b.Comment)
 	commentInput.Optional = true
 
-	return Dialog{
+	return slack.Dialog{
 		CallbackID:  callbackID,
 		Title:       fmt.Sprintf("Save Drink"),
 		SubmitLabel: "Save",
-		Elements: []DialogElement{
+		Elements: []slack.DialogElement{
 			nameInput,
 			commentInput,
 		},

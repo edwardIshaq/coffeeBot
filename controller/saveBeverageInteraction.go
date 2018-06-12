@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/edwardIshaq/slack"
 )
 
 /*
@@ -45,7 +47,7 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 
 	actionCallback := parseAttachmentActionCallback(r)
 	if len(actionCallback.Actions) < 1 {
-		dialogResponse := models.DialogSubmitCallback{}
+		dialogResponse := slack.DialogSubmitCallback{}
 		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
 		if len(dialogResponse.Submission) > 0 {
 			d.handleSaveNameCallback(w, r, dialogResponse)
@@ -77,7 +79,7 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 
 func (d *saveBeverageInteraction) handleSaveNameCallback(w http.ResponseWriter,
 	r *http.Request,
-	submitCallback models.DialogSubmitCallback) {
+	submitCallback slack.DialogSubmitCallback) {
 	matches := d.callbackRegex.FindStringSubmatch(submitCallback.CallbackID)
 	if len(matches) < 2 {
 		fmt.Println("no matches", matches)

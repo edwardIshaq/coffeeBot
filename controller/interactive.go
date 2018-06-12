@@ -6,7 +6,6 @@ TODO:
 	Probably should look under `payload`
 */
 import (
-	"SlackPlatform/models"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -72,7 +71,7 @@ func replyMessage(params *slack.Msg, responseURL string) {
 	defer resp.Body.Close()
 }
 
-func postDialog(dialog models.Dialog, triggerID, token string) {
+func postDialog(dialog slack.Dialog, triggerID, token string) {
 	if dialogjson, err := json.Marshal(dialog); err == nil {
 		postBody := url.Values{
 			"token":      {token},
@@ -106,7 +105,7 @@ func postDialog(dialog models.Dialog, triggerID, token string) {
 			}
 			bodyString := string(bodyBytes)
 			fmt.Println("\nbodyString: ", bodyString)
-			resp := &models.DialogOpenResponse{}
+			resp := &slack.DialogOpenResponse{}
 			json.Unmarshal(bodyBytes, &resp)
 			fmt.Printf("\n\nDialogOpenResponse: %v\n\n", resp)
 		}

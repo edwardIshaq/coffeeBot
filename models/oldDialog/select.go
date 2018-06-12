@@ -1,4 +1,4 @@
-package models
+package oldDialog
 
 // SelectDataSource types of select datasource
 type SelectDataSource string

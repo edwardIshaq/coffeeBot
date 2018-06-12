@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+
+	"github.com/edwardIshaq/slack"
 )
 
 type dialogInteraction struct {
@@ -37,10 +39,10 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 		chosenBev = strings.Split(actionCallback.CallbackID, ".")[2]
 	}
 
-	dialogResponse := models.DialogSubmitCallback{}
+	dialogResponse := slack.DialogSubmitCallback{}
 	json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
 	// save beverage and post feedback message
-	newBeverage := dialogResponse.SaveNewBeverage(chosenBev)
+	newBeverage := models.SaveNewBeverage(dialogResponse, chosenBev)
 	if newBeverage == nil {
 		log.Println("Failed to save a new beverage")
 		return

@@ -1,4 +1,4 @@
-package models
+package oldDialog
 
 import (
 	"github.com/edwardIshaq/slack"
