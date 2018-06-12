@@ -41,8 +41,8 @@ type PayloadResponse struct {
 	VerificationToken string     `json:"token"`
 }
 
-// FeedbackMessage generates a slack feedback message for the chose beverage
-func (b Beverage) FeedbackMessage() *slack.Msg {
+// CreateFields converts a beverage to a list of fields
+func (b Beverage) CreateFields() []slack.AttachmentField {
 	fields := &[]slack.AttachmentField{}
 	appendFieldIfNotEmpty(fields, "Name", b.Name)
 	appendFieldIfNotEmpty(fields, "Category", b.Category)
@@ -51,28 +51,28 @@ func (b Beverage) FeedbackMessage() *slack.Msg {
 	appendFieldIfNotEmpty(fields, "Syrup", b.Syrup)
 	appendFieldIfNotEmpty(fields, "Temperture", b.Temperture)
 	appendFieldIfNotEmpty(fields, "Comment", b.Comment)
+	return *fields
+}
+
+// FeedbackMessage generates a slack feedback message for the chose beverage
+func (b Beverage) FeedbackMessage() *slack.Msg {
+	fields := b.CreateFields()
 
 	saveActionValue := fmt.Sprintf("save_beverage.%d", b.ID)
-	confirmActionValue := fmt.Sprintf("confirm_beverage.%d", b.ID)
 	params := &slack.Msg{
 		Attachments: []slack.Attachment{
 			slack.Attachment{
+				Text:   "Please confirm your order in channel #cafe_requests when you arrive",
 				Color:  "#eaca67",
-				Fields: *fields,
+				Fields: fields,
 			},
 			slack.Attachment{
-				Text:       "Confirm your here to pickup your order",
+				Text:       "Would you like to name this drink for future orders?",
 				CallbackID: "order_created",
 				Actions: []slack.AttachmentAction{
 					slack.AttachmentAction{
 						Type:  "button",
-						Text:  "Confirm",
-						Name:  "confirm_beverage",
-						Value: confirmActionValue,
-					},
-					slack.AttachmentAction{
-						Type:  "button",
-						Text:  "Save Your Drink",
+						Text:  "Save",
 						Name:  "save_beverage",
 						Value: saveActionValue,
 					},

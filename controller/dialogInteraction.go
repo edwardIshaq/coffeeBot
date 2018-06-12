@@ -3,12 +3,17 @@ package controller
 import (
 	"SlackPlatform/models"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
 
 	"github.com/edwardIshaq/slack"
+)
+
+const (
+	cafeRequestsChannel = "C0SCMST6C"
 )
 
 type dialogInteraction struct {
@@ -40,12 +45,47 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 
 	dialogResponse := slack.DialogSubmitCallback{}
 	json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
-	// save beverage and post feedback message
-	newBeverage := models.SaveNewBeverage(dialogResponse, chosenBev)
-	if newBeverage == nil {
+
+	// save beverage
+	beverage := models.SaveNewBeverage(dialogResponse, chosenBev)
+	if beverage == nil {
 		log.Println("Failed to save a new beverage")
 		return
 	}
-	params := newBeverage.FeedbackMessage()
-	replyMessage(params, actionCallback.ResponseURL)
+
+	//post feedback message to user
+	replyMessage(beverage.FeedbackMessage(), actionCallback.ResponseURL)
+
+	//Post to #cafeRequestsChannel
+	go postToCafeChannel(beverage, actionCallback, api)
+}
+
+func postToCafeChannel(beverage *models.Beverage, actionCallback slack.AttachmentActionCallback, api *slack.Client) {
+	confirmActionValue := fmt.Sprintf("confirm_beverage.%d", beverage.ID)
+	postParams := slack.PostMessageParameters{
+		Attachments: []slack.Attachment{
+			slack.Attachment{
+				CallbackID: "order.confirmOrCancel",
+				Fields:     beverage.CreateFields(),
+				Actions: []slack.AttachmentAction{
+					slack.AttachmentAction{
+						Type:  "button",
+						Text:  "Confirm Order",
+						Name:  "confirm_beverage",
+						Value: confirmActionValue,
+					},
+					slack.AttachmentAction{
+						Type:  "button",
+						Text:  "Cancel Order",
+						Name:  "cancel_beverage",
+						Value: confirmActionValue,
+					},
+				},
+			},
+		},
+	}
+	title := fmt.Sprintf("New Order from *%s*", actionCallback.User.Name)
+	if _, _, err := api.PostMessage(cafeRequestsChannel, title, postParams); err != nil {
+		fmt.Printf("Error posting to #cafe_requests %v", err)
+	}
 }
