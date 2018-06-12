@@ -32,8 +32,7 @@ func (d *dialogInteraction) canHandleCallback(callback string) bool {
 	return d.callbackRegex.MatchString(callback)
 }
 
-func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Request) {
-	actionCallback := parseAttachmentActionCallback(r)
+func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
 	var chosenBev string
 	if strings.HasPrefix(actionCallback.CallbackID, "barista.dialog.") {
 		chosenBev = strings.Split(actionCallback.CallbackID, ".")[2]

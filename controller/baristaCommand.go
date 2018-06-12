@@ -103,7 +103,7 @@ func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
 	return models.MakeAttachmentOptionsFromMap(bevsMap)
 }
 
-func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request) {
+func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
 	r.ParseForm()
 
 	token, ok := middleware.AccessToken(r.Context())
@@ -113,8 +113,6 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Process callback to extract `barista.dialog.<chosenBev>`
-	actionCallback := parseAttachmentActionCallback(r)
-
 	if len(actionCallback.Actions) < 1 {
 		return
 	}

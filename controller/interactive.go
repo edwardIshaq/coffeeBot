@@ -28,7 +28,7 @@ func (i *interactive) addComponent(comp interactiveComponent) {
 
 type interactiveComponent interface {
 	canHandleCallback(string) bool
-	handleCallback(http.ResponseWriter, *http.Request)
+	handleCallback(http.ResponseWriter, *http.Request, slack.AttachmentActionCallback)
 }
 
 func (i *interactive) registerRoutes() {
@@ -48,7 +48,7 @@ func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.R
 	// Scan `components` to see who can hanle this callbackID
 	actionCallback := parseAttachmentActionCallback(r)
 	if comp := i.callbackHandler(actionCallback.CallbackID); comp != nil {
-		comp.handleCallback(w, r)
+		comp.handleCallback(w, r, actionCallback)
 		return
 	}
 

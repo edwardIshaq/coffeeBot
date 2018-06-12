@@ -38,14 +38,13 @@ func (d *saveBeverageInteraction) canHandleCallback(callback string) bool {
 	return d.callbackRegex.MatchString(callback)
 }
 
-func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.Request) {
+func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
 	token, ok := middleware.AccessToken(r.Context())
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	actionCallback := parseAttachmentActionCallback(r)
 	if len(actionCallback.Actions) < 1 {
 		dialogResponse := slack.DialogSubmitCallback{}
 		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
