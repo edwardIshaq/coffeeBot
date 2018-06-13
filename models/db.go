@@ -18,6 +18,7 @@ func SetDatabase(database *gorm.DB) {
 func setupTables() {
 	db.AutoMigrate(&Team{})
 	db.AutoMigrate(&Beverage{})
+	db.AutoMigrate(&Order{})
 	db.Model(&Beverage{}).AddUniqueIndex("uniq_idx_default_bevs", "category", "name", "default_drink")
 }
 
