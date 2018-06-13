@@ -124,11 +124,19 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, ac
 	//Check if its a user defined beverage
 	presetBeverage := models.BeverageByID(beverageSelectionID)
 	if !presetBeverage.DefaultDrink {
+		//Create a new Order
+		models.SaveNewOrder(presetBeverage)
 		//if it is send a feedback message
 		params := presetBeverage.FeedbackMessage()
 		replyMessage(params, actionCallback.ResponseURL)
+
+		//Post to #cafeRequestsChannel
+		go postToCafeChannel(&presetBeverage, actionCallback, api)
+
 		return
 	}
+	//Else picked one of the pre-defined bevs
+	//Time to customize it
 	dialog := presetBeverage.MakeDialog()
 	postDialog(dialog, actionCallback.TriggerID, token)
 }

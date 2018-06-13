@@ -58,25 +58,12 @@ func (b Beverage) CreateFields() []slack.AttachmentField {
 func (b Beverage) FeedbackMessage() *slack.Msg {
 	fields := b.CreateFields()
 
-	saveActionValue := fmt.Sprintf("save_beverage.%d", b.ID)
 	params := &slack.Msg{
 		Attachments: []slack.Attachment{
 			slack.Attachment{
 				Text:   "Please confirm your order in channel #cafe_requests when you arrive",
 				Color:  "#eaca67",
 				Fields: fields,
-			},
-			slack.Attachment{
-				Text:       "Would you like to name this drink for future orders?",
-				CallbackID: "order_created",
-				Actions: []slack.AttachmentAction{
-					slack.AttachmentAction{
-						Type:  "button",
-						Text:  "Save",
-						Name:  "save_beverage",
-						Value: saveActionValue,
-					},
-				},
 			},
 		},
 	}
