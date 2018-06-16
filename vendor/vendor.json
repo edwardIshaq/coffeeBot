@@ -3,10 +3,10 @@
 	"ignore": "test",
 	"package": [
 		{
-			"checksumSHA1": "oAqUjlbj01bwjfILlf1alT1i7r4=",
+			"checksumSHA1": "kvMFnO0X2OXMm9t9ZOxG9QkNpw8=",
 			"path": "github.com/edwardIshaq/slack",
-			"revision": "6873c43d97cd633583bdbea01f63b38c27df7657",
-			"revisionTime": "2018-06-11T03:45:11Z"
+			"revision": "a1c03e9ac79f915633e762968c42ce9ad19bee3a",
+			"revisionTime": "2018-06-16T03:12:02Z"
 		},
 		{
 			"checksumSHA1": "mB5P3/XIC7r4Jc0/K86NA9Jq2CA=",
