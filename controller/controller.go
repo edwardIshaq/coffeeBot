@@ -22,13 +22,14 @@ import (
 )
 
 var (
-	installer     *appInstaller
-	slashBarista  *slashCommand
-	dialogHandler *dialogInteraction
-	saveBevAction *saveBeverageInteraction
-	interact      *interactive
-	db            *gorm.DB
-	api           *slack.Client
+	installer           *appInstaller
+	slashBarista        *slashCommand
+	dialogHandler       *dialogInteraction
+	orderConfirmHandler *orderConfirmInteraction
+	saveBevAction       *saveBeverageInteraction
+	interact            *interactive
+	db                  *gorm.DB
+	api                 *slack.Client
 )
 
 func init() {
@@ -43,6 +44,9 @@ func init() {
 
 	saveBevAction = saveBevInteraction()
 	interact.addComponent(saveBevAction)
+
+	orderConfirmHandler = newOrderConfirm()
+	interact.addComponent(orderConfirmHandler)
 }
 
 // StartupControllers call this function to setup the controllers

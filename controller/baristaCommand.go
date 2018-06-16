@@ -125,13 +125,13 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, ac
 	presetBeverage := models.BeverageByID(beverageSelectionID)
 	if !presetBeverage.DefaultDrink {
 		//Create a new Order
-		models.SaveNewOrder(presetBeverage)
+		order := models.SaveNewOrder(presetBeverage)
 		//if it is send a feedback message
 		params := presetBeverage.FeedbackMessage()
 		replyMessage(params, actionCallback.ResponseURL)
 
 		//Post to #cafeRequestsChannel
-		go postToCafeChannel(&presetBeverage, actionCallback, api)
+		go postToCafeChannel(&presetBeverage, order, actionCallback, api)
 
 		return
 	}
