@@ -19,8 +19,8 @@ type orderConfirmInteraction struct {
 
 func newOrderConfirm() *orderConfirmInteraction {
 	callbackID := "order.confirmOrCancel"
-	pattern := fmt.Sprintf(`%s\.(\d*)`, callbackID)
-	regex, _ := regexp.Compile(pattern)
+	// pattern := fmt.Sprintf(`%s\.(\d*)`, callbackID)
+	regex, _ := regexp.Compile(`order\.confirmOrCancel`)
 	return &orderConfirmInteraction{
 		callbackID:    callbackID,
 		callbackRegex: regex,
@@ -36,16 +36,27 @@ func (o *orderConfirmInteraction) callbackForID(beverageID uint) string {
 }
 
 func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
+	// matches := o.callbackRegex.FindStringSubmatch(actionCallback.CallbackID)
+	// if len(matches) < 2 {
+	// 	fmt.Println("no matches", matches)
+	// 	return
+	// }
 
-	matches := o.callbackRegex.FindStringSubmatch(actionCallback.CallbackID)
-	if len(matches) < 2 {
-		fmt.Println("no matches", matches)
-		return
+	action := actionCallback.Actions[0]
+	order := models.OrderByID(action.Value)
+
+	switch action.Name {
+	case "confirm_beverage":
+		handleConfirm(r, actionCallback, order)
+
+	case "cancel_beverage":
+		handleCancel(r, actionCallback, order)
+
+	default:
+		fmt.Println(action)
+		w.WriteHeader(http.StatusBadRequest)
 	}
-	orderID := matches[1]
-	order := models.OrderByID(orderID)
 
-	handleConfirm(r, actionCallback, order)
 }
 
 func handleConfirm(r *http.Request, actionCallback slack.AttachmentActionCallback, order models.Order) {
@@ -55,12 +66,36 @@ func handleConfirm(r *http.Request, actionCallback slack.AttachmentActionCallbac
 		fmt.Println("Has no attachments")
 		return
 	}
+
+	newTitle := fmt.Sprintf("%s - Confirmed :white_check_mark:", updatedMessage.Text)
 	attachment := updatedMessage.Attachments[0]
 	attachment.Actions = []slack.AttachmentAction{}
 	attachment.Color = "#00cc00"
 
 	api = crossfunction.ClientForRequest(r)
-	msgOption := slack.MsgOptionText("Order confirmed", false)
+	msgOption := slack.MsgOptionText(newTitle, false)
+	attachmentOption := slack.MsgOptionAttachments(attachment)
+	updateOption := slack.MsgOptionUpdate(updatedMessage.Timestamp)
+	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)
+}
+
+func handleCancel(r *http.Request, actionCallback slack.AttachmentActionCallback, order models.Order) {
+	order.Cancel()
+	updatedMessage := actionCallback.OriginalMessage
+	if len(updatedMessage.Attachments) < 1 {
+		fmt.Println("Has no attachments")
+		return
+	}
+
+	newTitle := fmt.Sprintf("%s - Canceled :no_entry:", updatedMessage.Text)
+
+	attachment := updatedMessage.Attachments[0]
+	attachment.Fields = []slack.AttachmentField{}
+	attachment.Actions = []slack.AttachmentAction{}
+	attachment.Color = "#BEBEBE"
+
+	api = crossfunction.ClientForRequest(r)
+	msgOption := slack.MsgOptionText(newTitle, false)
 	attachmentOption := slack.MsgOptionAttachments(attachment)
 	updateOption := slack.MsgOptionUpdate(updatedMessage.Timestamp)
 	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)

@@ -41,3 +41,8 @@ func (o Order) Confirm() {
 	o.IsConfirmed = true
 	db.Save(o)
 }
+
+// Cancel update the model to be confirmed
+func (o Order) Cancel() {
+	db.Delete(o)
+}
