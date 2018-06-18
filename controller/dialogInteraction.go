@@ -61,7 +61,6 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 }
 
 func postToCafeChannel(beverage *models.Beverage, order models.Order, actionCallback slack.AttachmentActionCallback, api *slack.Client) {
-	// callbackID := orderConfirmHandler.callbackID
 	callbackID := "order.confirmOrCancel"
 	actionValue := fmt.Sprintf("%d", order.ID)
 	postParams := slack.PostMessageParameters{

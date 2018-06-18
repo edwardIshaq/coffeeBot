@@ -19,7 +19,6 @@ type orderConfirmInteraction struct {
 
 func newOrderConfirm() *orderConfirmInteraction {
 	callbackID := "order.confirmOrCancel"
-	// pattern := fmt.Sprintf(`%s\.(\d*)`, callbackID)
 	regex, _ := regexp.Compile(`order\.confirmOrCancel`)
 	return &orderConfirmInteraction{
 		callbackID:    callbackID,
@@ -36,12 +35,6 @@ func (o *orderConfirmInteraction) callbackForID(beverageID uint) string {
 }
 
 func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
-	// matches := o.callbackRegex.FindStringSubmatch(actionCallback.CallbackID)
-	// if len(matches) < 2 {
-	// 	fmt.Println("no matches", matches)
-	// 	return
-	// }
-
 	action := actionCallback.Actions[0]
 	order := models.OrderByID(action.Value)
 
@@ -53,7 +46,6 @@ func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.
 		handleCancel(r, actionCallback, order)
 
 	default:
-		fmt.Println(action)
 		w.WriteHeader(http.StatusBadRequest)
 	}
 
