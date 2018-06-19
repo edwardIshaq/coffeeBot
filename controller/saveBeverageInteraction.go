@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"strings"
 
 	"github.com/edwardIshaq/slack"
 )
@@ -26,8 +25,9 @@ type saveBeverageInteraction struct {
 }
 
 func saveBevInteraction() *saveBeverageInteraction {
-	callbackID := "order_created"
-	regex, _ := regexp.Compile(`order_created|saveBeverageName\.(\d*)`)
+	callbackID := "NameBeverageOrCancelOrder"
+	pattern := `NameBeverageOrCancelOrder|NameBeverage\.(\d*)`
+	regex, _ := regexp.Compile(pattern)
 	return &saveBeverageInteraction{
 		callbackID:    callbackID,
 		callbackRegex: regex,
@@ -55,23 +55,18 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 		return
 	}
 
-	actionComponents := strings.Split(actionCallback.Actions[0].Value, ".")
-	if len(actionComponents) < 2 {
-		fmt.Printf("Expecting `<action>.<bevID>` format, instead got %s\n", actionCallback.Actions[0].Value)
-		return
-	}
-	action := actionComponents[0]
-	chosenBevID := actionComponents[1]
-	beverage := models.BeverageByID(chosenBevID)
+	action := actionCallback.Actions[0]
 
-	switch action {
-	case "save_beverage":
+	switch action.Name {
+	case "SaveButton":
+		beverage := models.BeverageByID(action.Value)
 		dialog := beverage.MakeSaveNameDialog()
 		postDialog(dialog, actionCallback.TriggerID, token)
 
-	case "confirm_beverage":
-		fmt.Printf("Confirm order %v", beverage)
-
+	case "CancelButton":
+		orderID := action.Value
+		order := models.OrderByID(orderID)
+		handleCancel(r, actionCallback, order)
 	}
 
 }

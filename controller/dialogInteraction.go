@@ -53,8 +53,35 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	order := models.SaveNewOrder(*beverage)
+	orderID := fmt.Sprintf("%d", order.ID)
+	bevID := fmt.Sprintf("%d", beverage.ID)
+
 	//post feedback message to user
-	replyMessage(beverage.FeedbackMessage(), actionCallback.ResponseURL)
+	feedback := beverage.FeedbackMessage()
+	buttonAttachment := slack.Attachment{
+		CallbackID: saveBevAction.callbackID,
+		Actions: []slack.AttachmentAction{
+			//Save Beverage
+			slack.AttachmentAction{
+				Name:  "SaveButton",
+				Text:  "Save",
+				Type:  "button",
+				Value: bevID,
+			},
+			//Cancel Order
+			slack.AttachmentAction{
+				Name:  "CancelButton",
+				Text:  "Cancel",
+				Type:  "button",
+				Value: orderID,
+			},
+		},
+	}
+	attachments := feedback.Attachments
+	attachments = append(attachments, buttonAttachment)
+	feedback.Attachments = attachments
+	replyMessage(feedback, actionCallback.ResponseURL)
 
 	//Post to #cafeRequestsChannel
 	go postToCafeChannel(beverage, models.Order{}, actionCallback, api)

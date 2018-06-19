@@ -143,8 +143,7 @@ func DialogTitle(title string) string {
 
 // MakeSaveNameDialog to save a custom title for the drink
 func (b Beverage) MakeSaveNameDialog() slack.Dialog {
-	callbackID := fmt.Sprintf("saveBeverageName.%d", b.ID)
-
+	callbackID := fmt.Sprintf("NameBeverage.%d", b.ID)
 	nameInput := slack.NewTextInput("drinkName", "Drink Name", b.Name)
 	commentInput := slack.NewTextAreaInput("comment", "Comments", b.Comment)
 	commentInput.Optional = true
