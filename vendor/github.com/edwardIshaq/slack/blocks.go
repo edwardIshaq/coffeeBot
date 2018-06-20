@@ -12,8 +12,8 @@ const (
 	ImageBlockType BlockType = "image"
 	// TextBlockType a simple text block
 	TextBlockType BlockType = "text"
-	// TextCollectionBlockType Text Collection Block
-	TextCollectionBlockType BlockType = "text_collection"
+	// TextGroupBlockType Text Collection Block
+	TextGroupBlockType BlockType = "text_group"
 	// ActionBlockType is a collection of up to 5 Actions (select, button, overflow, datepicker)
 	ActionBlockType BlockType = "action"
 	// ContextBlockType is a collection of up to 10 elements of type (image, text, user)
@@ -59,8 +59,8 @@ func NewDividerBlock(blockID string) DividerBlock {
 // TextBlock a simple text block
 type TextBlock struct {
 	BaseBlock
-	Text    string       `json:"text,omitempty"`
-	Element BlockElement `json:"element,omitempty"`
+	Text    string                     `json:"text,omitempty"`
+	Element TextBlockCompatibleElement `json:"element,omitempty"`
 }
 
 // NewTextBlock constructs a new text block with ID and text
@@ -71,6 +71,18 @@ func NewTextBlock(text, blockID string) TextBlock {
 			Type:    string(TextBlockType),
 		},
 		Text: text,
+	}
+}
+
+// NewTextBlockWithElement create new TextBlock with Embedded element
+func NewTextBlockWithElement(text, blockID string, element TextBlockCompatibleElement) TextBlock {
+	return TextBlock{
+		BaseBlock: BaseBlock{
+			BlockID: blockID,
+			Type:    string(TextBlockType),
+		},
+		Text:    text,
+		Element: element,
 	}
 }
 
