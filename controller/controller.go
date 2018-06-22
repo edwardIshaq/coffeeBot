@@ -17,6 +17,9 @@ TODO:
 */
 
 import (
+	"SlackPlatform/middleware"
+	"net/http"
+
 	"github.com/edwardIshaq/slack"
 	"github.com/jinzhu/gorm"
 )
@@ -60,4 +63,11 @@ func StartupControllers(gormDB *gorm.DB) {
 	installer.registerRoutes()
 	slashBarista.registerRoutes()
 	interact.registerRoutes()
+}
+
+// assignSlackClient gets one from the r.Context()
+func assignSlackClient(r *http.Request) (*slack.Client, bool) {
+	slackClient, err := middleware.SlackAPI(r.Context())
+	api = slackClient
+	return slackClient, err
 }

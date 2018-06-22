@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"SlackPlatform/crossfunction"
 	"SlackPlatform/models"
 	"fmt"
 	"net/http"
@@ -64,10 +63,10 @@ func handleConfirm(r *http.Request, actionCallback slack.AttachmentActionCallbac
 	attachment.Actions = []slack.AttachmentAction{}
 	attachment.Color = "#00cc00"
 
-	api = crossfunction.ClientForRequest(r)
 	msgOption := slack.MsgOptionText(newTitle, false)
 	attachmentOption := slack.MsgOptionAttachments(attachment)
 	updateOption := slack.MsgOptionUpdate(updatedMessage.Timestamp)
+	assignSlackClient(r)
 	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)
 }
 
@@ -86,9 +85,10 @@ func handleCancel(r *http.Request, actionCallback slack.AttachmentActionCallback
 	attachment.Actions = []slack.AttachmentAction{}
 	attachment.Color = "#BEBEBE"
 
-	api = crossfunction.ClientForRequest(r)
 	msgOption := slack.MsgOptionText(newTitle, false)
 	attachmentOption := slack.MsgOptionAttachments(attachment)
 	updateOption := slack.MsgOptionUpdate(updatedMessage.Timestamp)
+
+	assignSlackClient(r)
 	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)
 }

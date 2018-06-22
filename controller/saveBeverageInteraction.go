@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"encoding/json"
 	"fmt"
@@ -39,15 +38,9 @@ func (d *saveBeverageInteraction) canHandleCallback(callback string) bool {
 }
 
 func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
-	token, ok := middleware.AccessToken(r.Context())
-	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	switch actionCallback.CallbackID {
 	case "NameBeverageOrCancelOrder":
-		d.handleButtonPressed(r, actionCallback, token)
+		d.handleButtonPressed(r, actionCallback)
 
 	default:
 		//NameBeverage.<Beverage.ID>
@@ -64,7 +57,7 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 
 }
 
-func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCallback slack.AttachmentActionCallback, token string) {
+func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCallback slack.AttachmentActionCallback) {
 	if len(actionCallback.Actions) != 1 {
 		fmt.Printf("\nExpecting 1 Action got %v", actionCallback.Actions)
 		return
@@ -75,7 +68,9 @@ func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCal
 	case "SaveButton":
 		beverage := models.BeverageByID(action.Value)
 		dialog := beverage.MakeSaveNameDialog()
-		postDialog(dialog, actionCallback.TriggerID, token)
+		dialog.TriggerID = actionCallback.TriggerID
+		assignSlackClient(r)
+		api.OpenDialog(dialog)
 
 	case "CancelButton":
 		orderID := action.Value

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"SlackPlatform/crossfunction"
 	"SlackPlatform/middleware"
 	"context"
 	"fmt"
@@ -52,7 +51,8 @@ func handleScopeRequests(w http.ResponseWriter, r *http.Request) {
 	triggerID := r.PostFormValue("trigger_id")
 	userID := r.PostFormValue("user_id")
 
-	api = crossfunction.ClientForRequest(r)
+	var ok bool
+	api, ok = assignSlackClient(r)
 	accessToken, ok := middleware.AccessToken(r.Context())
 	if !ok {
 		fmt.Printf("Error retrieving access token")

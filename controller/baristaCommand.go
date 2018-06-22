@@ -8,7 +8,6 @@ TODO:
 */
 
 import (
-	"SlackPlatform/crossfunction"
 	"SlackPlatform/models"
 	"net/http"
 	"regexp"
@@ -54,6 +53,12 @@ func (s *slashCommand) route() string {
 }
 
 func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) {
+	_, ok := assignSlackClient(r)
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	channelID := r.PostFormValue("channel_id")
 	attachment := slack.Attachment{
 		Fallback:   "Choose a beverage from the menu",
@@ -101,6 +106,12 @@ func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
 }
 
 func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
+	_, ok := assignSlackClient(r)
+	if !ok {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
 	r.ParseForm()
 
 	//Process callback to extract `barista.dialog.<chosenBev>`
@@ -129,6 +140,5 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, ac
 	//Else picked one of the pre-defined bevs
 	//Time to customize it
 	dialog := selectedBeverage.MakeDialog(actionCallback.TriggerID)
-	api = crossfunction.ClientForRequest(r)
 	api.OpenDialog(dialog)
 }
