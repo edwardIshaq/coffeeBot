@@ -45,18 +45,32 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if len(actionCallback.Actions) < 1 {
-		dialogResponse := slack.DialogSubmitCallback{}
-		json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
-		if len(dialogResponse.Submission) > 0 {
-			d.handleSaveNameCallback(w, r, dialogResponse)
+	switch actionCallback.CallbackID {
+	case "NameBeverageOrCancelOrder":
+		d.handleButtonPressed(r, actionCallback, token)
+
+	default:
+		//NameBeverage.<Beverage.ID>
+		if len(actionCallback.Actions) == 0 {
+			dialogResponse := slack.DialogSubmitCallback{}
+			json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
+			if len(dialogResponse.Submission) > 0 {
+				d.handleSaveNameCallback(w, r, dialogResponse, actionCallback)
+				return
+			}
 			return
 		}
+	}
+
+}
+
+func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCallback slack.AttachmentActionCallback, token string) {
+	if len(actionCallback.Actions) != 1 {
+		fmt.Printf("\nExpecting 1 Action got %v", actionCallback.Actions)
 		return
 	}
 
 	action := actionCallback.Actions[0]
-
 	switch action.Name {
 	case "SaveButton":
 		beverage := models.BeverageByID(action.Value)
@@ -68,21 +82,28 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 		order := models.OrderByID(orderID)
 		handleCancel(r, actionCallback, order)
 	}
-
 }
 
 func (d *saveBeverageInteraction) handleSaveNameCallback(w http.ResponseWriter,
 	r *http.Request,
-	submitCallback slack.DialogSubmitCallback) {
+	submitCallback slack.DialogSubmitCallback,
+	actionCallback slack.AttachmentActionCallback) {
+
 	matches := d.callbackRegex.FindStringSubmatch(submitCallback.CallbackID)
 	if len(matches) < 2 {
 		fmt.Println("no matches", matches)
 		return
 	}
+
 	beverageID := matches[1]
 	bev := models.BeverageByID(beverageID)
 	drinkName := submitCallback.Submission["drinkName"]
 	comment := submitCallback.Submission["comment"]
 	bev.UpdateDrink(drinkName, comment)
 	w.WriteHeader(http.StatusOK)
+
+	params := &slack.Msg{
+		Text: fmt.Sprintf("New drink saved as %s", drinkName),
+	}
+	replyMessage(params, actionCallback.ResponseURL)
 }

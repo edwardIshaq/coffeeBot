@@ -47,6 +47,7 @@ func (i *interactive) callbackHandler(callbackID string) interactiveComponent {
 func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	// Scan `components` to see who can hanle this callbackID
 	actionCallback := parseAttachmentActionCallback(r)
+	fmt.Println("Received interactive callback", debugJSON(actionCallback))
 	if comp := i.callbackHandler(actionCallback.CallbackID); comp != nil {
 		comp.handleCallback(w, r, actionCallback)
 		return
@@ -55,6 +56,14 @@ func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.R
 	// payload := r.PostFormValue("payload")
 	// fmt.Printf("payload= %v\n", payload)
 	http.NotFound(w, r)
+}
+
+func debugJSON(v interface{}) string {
+	b, err := json.MarshalIndent(v, " ", "\t")
+	if err != nil {
+		return fmt.Sprintf("indent JSON failed with error: %v", err)
+	}
+	return string(b)
 }
 
 func replyMessage(params *slack.Msg, responseURL string) {
@@ -71,45 +80,53 @@ func replyMessage(params *slack.Msg, responseURL string) {
 	defer resp.Body.Close()
 }
 
-func postDialog(dialog slack.Dialog, triggerID, token string) {
-	if dialogjson, err := json.Marshal(dialog); err == nil {
-		postBody := url.Values{
-			"token":      {token},
-			"trigger_id": {triggerID},
-			"dialog":     {string(dialogjson)},
-		}
-
-		reqBody := strings.NewReader(postBody.Encode())
-		req, err := http.NewRequest("POST", slack.SLACK_API+"dialog.open", reqBody)
-		if err != nil {
-			fmt.Println("error happened: ", err)
-			return
-		}
-
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = req.WithContext(context.Background())
-
-		//Fire the request
-		resp, err := slack.HTTPClient.Do(req)
-		if err != nil {
-			fmt.Println("\nResponseError: ", err)
-			return
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode == http.StatusOK {
-			bodyBytes, err2 := ioutil.ReadAll(resp.Body)
-			if err2 != nil {
-				fmt.Printf("error reading body %v", err2)
-				return
-			}
-			bodyString := string(bodyBytes)
-			fmt.Println("\nbodyString: ", bodyString)
-			resp := &slack.DialogOpenResponse{}
-			json.Unmarshal(bodyBytes, &resp)
-			fmt.Printf("\n\nDialogOpenResponse: %v\n\n", resp)
-		}
+func postDialog(dialog slack.Dialog, triggerID, token string) error {
+	dialogjson, err := json.Marshal(dialog)
+	if err != nil {
+		return fmt.Errorf("Error converting dialog to json: %v", err)
 	}
+
+	values := url.Values{
+		"token":      {token},
+		"trigger_id": {triggerID},
+		"dialog":     {string(dialogjson)},
+	}
+
+	reqBody := strings.NewReader(values.Encode())
+	req, err := http.NewRequest("POST", slack.SLACK_API+"dialog.open", reqBody)
+	if err != nil {
+		fmt.Println("error happened: ", err)
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req = req.WithContext(context.Background())
+
+	//Fire the request
+	resp, err := slack.HTTPClient.Do(req)
+	if err != nil {
+		fmt.Println("\nResponseError: ", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("Status Code not OK! , got: %d", resp.StatusCode)
+	}
+
+	bodyBytes, err2 := ioutil.ReadAll(resp.Body)
+	if err2 != nil {
+		fmt.Printf("error reading body %v", err2)
+		return err2
+	}
+
+	bodyString := string(bodyBytes)
+	fmt.Println("\nbodyString: ", bodyString)
+	dialogResponse := &slack.DialogOpenResponse{}
+	json.Unmarshal(bodyBytes, &dialogResponse)
+	fmt.Printf("\n\nDialogOpenResponse: %v\n\n", dialogResponse)
+	return nil
+
 }
 
 func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallback {

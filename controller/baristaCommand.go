@@ -9,7 +9,6 @@ TODO:
 
 import (
 	"SlackPlatform/crossfunction"
-	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"net/http"
 	"regexp"
@@ -46,8 +45,6 @@ func (s *slashCommand) registerRoutes() {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-
-		api = crossfunction.ClientForRequest(r)
 		s.respondToCommand(w, r)
 	})
 }
@@ -106,12 +103,6 @@ func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
 func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
 	r.ParseForm()
 
-	token, ok := middleware.AccessToken(r.Context())
-	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
 	//Process callback to extract `barista.dialog.<chosenBev>`
 	if len(actionCallback.Actions) < 1 {
 		return
@@ -137,6 +128,7 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, ac
 	}
 	//Else picked one of the pre-defined bevs
 	//Time to customize it
-	dialog := selectedBeverage.MakeDialog()
-	postDialog(dialog, actionCallback.TriggerID, token)
+	dialog := selectedBeverage.MakeDialog(actionCallback.TriggerID)
+	api = crossfunction.ClientForRequest(r)
+	api.OpenDialog(dialog)
 }

@@ -86,7 +86,7 @@ func SaveNewBeverage(d slack.DialogSubmitCallback, chosenBevID string) *Beverage
 }
 
 // MakeDialog creates a new dialog from the `Beverage`
-func (b Beverage) MakeDialog() slack.Dialog {
+func (b Beverage) MakeDialog(triggerID string) slack.Dialog {
 	cupMenu := slack.NewStaticSelectDialogInput("CupType", "Drink Size", stringsToSelectOptions(AllDrinkSizes()))
 	cupMenu.Value = b.CupType
 
@@ -108,6 +108,7 @@ func (b Beverage) MakeDialog() slack.Dialog {
 		CallbackID:  callbackID,
 		Title:       DialogTitle(b.Name),
 		SubmitLabel: "Order",
+		TriggerID:   triggerID,
 		Elements: []slack.DialogElement{
 			cupMenu,
 			espressMenu,
