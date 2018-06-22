@@ -66,7 +66,7 @@ func handleConfirm(r *http.Request, actionCallback slack.AttachmentActionCallbac
 	msgOption := slack.MsgOptionText(newTitle, false)
 	attachmentOption := slack.MsgOptionAttachments(attachment)
 	updateOption := slack.MsgOptionUpdate(updatedMessage.Timestamp)
-	assignSlackClient(r)
+	getSlackClientFromRequest(r)
 	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)
 }
 
@@ -89,6 +89,6 @@ func handleCancel(r *http.Request, actionCallback slack.AttachmentActionCallback
 	attachmentOption := slack.MsgOptionAttachments(attachment)
 	updateOption := slack.MsgOptionUpdate(updatedMessage.Timestamp)
 
-	assignSlackClient(r)
+	getSlackClientFromRequest(r)
 	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)
 }

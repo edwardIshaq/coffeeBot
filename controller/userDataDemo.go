@@ -52,7 +52,7 @@ func handleScopeRequests(w http.ResponseWriter, r *http.Request) {
 	userID := r.PostFormValue("user_id")
 
 	var ok bool
-	api, ok = assignSlackClient(r)
+	api, ok = getSlackClientFromRequest(r)
 	accessToken, ok := middleware.AccessToken(r.Context())
 	if !ok {
 		fmt.Printf("Error retrieving access token")

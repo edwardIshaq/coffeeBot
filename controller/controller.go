@@ -13,7 +13,7 @@ Dynamic Menu:			/dynamicMenu
 TODO:
 ------------------------------------------
 [√] save tokens to DB
-[ ] Add runtime flag to switch between dev/prod
+[√] Add runtime flag to switch between dev/prod
 */
 
 import (
@@ -65,8 +65,8 @@ func StartupControllers(gormDB *gorm.DB) {
 	interact.registerRoutes()
 }
 
-// assignSlackClient gets one from the r.Context()
-func assignSlackClient(r *http.Request) (*slack.Client, bool) {
+// getSlackClientFromRequest gets one from the r.Context()
+func getSlackClientFromRequest(r *http.Request) (*slack.Client, bool) {
 	slackClient, err := middleware.SlackAPI(r.Context())
 	api = slackClient
 	return slackClient, err

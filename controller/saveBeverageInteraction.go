@@ -69,7 +69,7 @@ func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCal
 		beverage := models.BeverageByID(action.Value)
 		dialog := beverage.MakeSaveNameDialog()
 		dialog.TriggerID = actionCallback.TriggerID
-		assignSlackClient(r)
+		getSlackClientFromRequest(r)
 		api.OpenDialog(dialog)
 
 	case "CancelButton":

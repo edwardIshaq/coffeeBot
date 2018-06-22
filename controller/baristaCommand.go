@@ -53,7 +53,7 @@ func (s *slashCommand) route() string {
 }
 
 func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) {
-	_, ok := assignSlackClient(r)
+	_, ok := getSlackClientFromRequest(r)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -106,7 +106,7 @@ func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
 }
 
 func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
-	_, ok := assignSlackClient(r)
+	_, ok := getSlackClientFromRequest(r)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
