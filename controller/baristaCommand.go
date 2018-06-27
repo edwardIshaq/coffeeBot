@@ -9,6 +9,7 @@ TODO:
 
 import (
 	"SlackPlatform/models"
+	"fmt"
 	"net/http"
 	"regexp"
 
@@ -65,7 +66,6 @@ func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) 
 		Color:      "#3AA3E3",
 		CallbackID: s.callbackID,
 	}
-	attachment.CallbackID = s.callbackID
 
 	//User Beverages
 	userID := r.PostFormValue("user_id")
@@ -97,7 +97,21 @@ func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) 
 
 	attachmentOption := slack.MsgOptionAttachments(attachment)
 	textOption := slack.MsgOptionText("What would you like to order ?", false)
-	api.PostEphemeral(channelID, userID, textOption, attachmentOption)
+	ephemeralOption := slack.MsgOptionPostEphemeral2(userID)
+
+	baristaMessageID, err := api.PostEphemeral(channelID, userID, textOption, ephemeralOption, attachmentOption)
+	if err != nil {
+		fmt.Printf("Error sending slash command %v", err)
+		return
+	} else if baristaMessageID == "" {
+		fmt.Println("No messageID received")
+		return
+	}
+
+	//else Start a new order with the `slashMessageTS`
+	go func(baristaMessageID string) {
+		models.NewBaristaCommandOrder(baristaMessageID)
+	}(baristaMessageID)
 }
 
 func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
