@@ -102,7 +102,7 @@ func (b Beverage) MakeDialog(triggerID string) slack.Dialog {
 	milkMenu := slack.NewStaticSelectDialogInput("Milk", "Milk", stringsToSelectOptions(AllMilkOptions()))
 	milkMenu.Value = b.Milk
 
-	callbackID := fmt.Sprintf("barista.dialog.%d", b.ID)
+	callbackID := fmt.Sprintf("barista.dialog.%s", triggerID)
 
 	dialog := slack.Dialog{
 		CallbackID:  callbackID,

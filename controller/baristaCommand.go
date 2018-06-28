@@ -45,7 +45,7 @@ func (s *slashCommand) registerRoutes() {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
-		s.respondToCommand(w, r)
+		s.sendBeverageMenu(w, r)
 	})
 }
 
@@ -53,7 +53,7 @@ func (s *slashCommand) route() string {
 	return "/" + s.slashCommand
 }
 
-func (s *slashCommand) respondToCommand(w http.ResponseWriter, r *http.Request) {
+func (s *slashCommand) sendBeverageMenu(w http.ResponseWriter, r *http.Request) {
 	_, ok := getSlackClientFromRequest(r)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -128,7 +128,6 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, ac
 
 	r.ParseForm()
 
-	//Process callback to extract `barista.dialog.<chosenBev>`
 	if len(actionCallback.Actions) < 1 {
 		return
 	}
@@ -136,9 +135,9 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, ac
 		return
 	}
 
-	beverageSelectionID := actionCallback.Actions[0].SelectedOptions[0].Value
+	selectedBevID := actionCallback.Actions[0].SelectedOptions[0].Value
 	//Check if its a user defined beverage
-	selectedBeverage := models.BeverageByID(beverageSelectionID)
+	selectedBeverage := models.BeverageByID(selectedBevID)
 	if !selectedBeverage.DefaultDrink {
 		//Create a new Order
 		order := models.SaveNewOrder(selectedBeverage)
@@ -151,8 +150,20 @@ func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, ac
 
 		return
 	}
+
+	//udpate order with the triggerID so we can remove the menu message
+	SlashBaristaMsgID := actionCallback.MessageTs
+	triggerID := actionCallback.TriggerID
+	if len(SlashBaristaMsgID) > 0 {
+		order := models.OrderByBaristaMessageID(SlashBaristaMsgID)
+		order.DialogTriggerID = triggerID
+		order.BeverageID = selectedBeverage.ID
+		fmt.Printf("order = %v", order)
+		order.Save()
+	}
+
 	//Else picked one of the pre-defined bevs
 	//Time to customize it
-	dialog := selectedBeverage.MakeDialog(actionCallback.TriggerID)
+	dialog := selectedBeverage.MakeDialog(triggerID)
 	api.OpenDialog(dialog)
 }

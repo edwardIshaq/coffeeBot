@@ -9,22 +9,36 @@ import (
 // Order tracks the status of a Beverage order
 type Order struct {
 	gorm.Model
-	BaristaCommandMessageID string
-	MenuMessageID           string
-	BeverageID              uint //`sql:"type:serial REFERENCES beverages(id)"`
-	IsConfirmed             bool
-	IsFulfilled             bool
+
+	SlashBaristaMsgID string
+	DialogTriggerID   string
+	BeverageID        uint
+
+	IsConfirmed bool
+	IsFulfilled bool
 }
 
 // NewBaristaCommandOrder Creates an order in the DB with the /barista messageID
 func NewBaristaCommandOrder(baristaMessageID string) Order {
 	order := Order{
-		BaristaCommandMessageID: baristaMessageID,
-		IsConfirmed:             false,
-		IsFulfilled:             false,
+		SlashBaristaMsgID: baristaMessageID,
 	}
 	db.Create(&order)
 	return order
+}
+
+// OrderByBaristaMessageID finds a beverage by BaristaCommandMessageID
+func OrderByBaristaMessageID(id string) Order {
+	order := Order{}
+	db.Where(&Order{SlashBaristaMsgID: id}).First(&order)
+	return order
+}
+
+// Fetch fetch a specified order
+func (o Order) Fetch() *Order {
+	fetchedOrder := new(Order)
+	db.Where(&o).First(&fetchedOrder)
+	return fetchedOrder
 }
 
 // SaveNewOrder Creates an order in the DB
@@ -58,4 +72,9 @@ func (o Order) Confirm() {
 // Cancel update the model to be confirmed
 func (o Order) Cancel() {
 	db.Delete(o)
+}
+
+// Save saves the order
+func (o Order) Save() {
+	db.Save(o)
 }

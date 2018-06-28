@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strings"
 
 	"github.com/edwardIshaq/slack"
 )
@@ -25,7 +24,8 @@ type dialogInteraction struct {
 
 func beverageDialogInteraction() *dialogInteraction {
 	callbackID := "barista.dialog"
-	regex, _ := regexp.Compile(callbackID)
+	pattern := `barista\.dialog\.(.*)`
+	regex, _ := regexp.Compile(pattern)
 
 	return &dialogInteraction{
 		callbackID:    callbackID,
@@ -38,24 +38,34 @@ func (d *dialogInteraction) canHandleCallback(callback string) bool {
 }
 
 func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
-	var chosenBev string
-	if strings.HasPrefix(actionCallback.CallbackID, "barista.dialog.") {
-		chosenBev = strings.Split(actionCallback.CallbackID, ".")[2]
+	matches := d.callbackRegex.FindStringSubmatch(actionCallback.CallbackID)
+	if len(matches) < 2 {
+		fmt.Printf("no triggerID found on: %s", actionCallback.CallbackID)
+		return
 	}
 
-	dialogResponse := slack.DialogSubmitCallback{}
-	json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
+	//Fetch the correct order
+	triggerID := matches[1]
+	orderQuery := models.Order{DialogTriggerID: triggerID}
+	fetchedOrder := orderQuery.Fetch()
+	fmt.Printf("fetched = %v", fetchedOrder)
+	if fetchedOrder == nil {
+		fmt.Printf("Couldn't find a matching order %v", actionCallback)
+		return
+	}
 
 	// save beverage
-	beverage := models.SaveNewBeverage(dialogResponse, chosenBev)
+	dialogResponse := slack.DialogSubmitCallback{}
+	json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
+	bevID := fmt.Sprintf("%d", fetchedOrder.BeverageID)
+	beverage := models.SaveNewBeverage(dialogResponse, bevID)
 	if beverage == nil {
 		log.Println("Failed to save a new beverage")
 		return
 	}
 
-	order := models.SaveNewOrder(*beverage)
-	orderID := fmt.Sprintf("%d", order.ID)
-	bevID := fmt.Sprintf("%d", beverage.ID)
+	// order := models.SaveNewOrder(*beverage)
+	orderID := fmt.Sprintf("%d", fetchedOrder.ID)
 
 	//post feedback message to user
 	feedback := beverage.FeedbackMessage()
@@ -85,6 +95,17 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 
 	//Post to #cafeRequestsChannel
 	go postToCafeChannel(beverage, models.Order{}, actionCallback, api)
+
+	channelID := actionCallback.Channel.ID
+	fmt.Printf("Now delete the menu message: %s %s", fetchedOrder.SlashBaristaMsgID, channelID)
+
+	str1, str2, err := api.DeleteMessage(channelID, fetchedOrder.SlashBaristaMsgID)
+	fmt.Printf("%s | %s | %v", str1, str2, err)
+
+	// go func(slashBaristaMsgID, channel string, api *slack.Client) {
+	// 	str1, str2, err := api.DeleteMessage(slashBaristaMsgID, channelID)
+	// 	fmt.Printf("%s | %s | %v", str1, str2, err)
+	// }(fetchedOrder.SlashBaristaMsgID, channelID, api)
 }
 
 func postToCafeChannel(beverage *models.Beverage, order models.Order, actionCallback slack.AttachmentActionCallback, api *slack.Client) {
