@@ -96,8 +96,6 @@ type Attachment struct {
 	Actions    []AttachmentAction `json:"actions,omitempty"`
 	MarkdownIn []string           `json:"mrkdwn_in,omitempty"`
 
-	Blocks []Block `json:"blocks,omitempty"`
-
 	Footer     string `json:"footer,omitempty"`
 	FooterIcon string `json:"footer_icon,omitempty"`
 
