@@ -1,0 +1,1 @@
+2018-6-29 updated `/barista` enabled "Escape channels, users, and links sent to your app"
