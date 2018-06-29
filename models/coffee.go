@@ -50,7 +50,7 @@ func AllTemps() []string {
 
 // espressoOption to captuer the espresso shots in a beverage
 const (
-	espressoNone    string = "None"
+	espressoNone    string = "No Espresso"
 	espressoSingle  string = "single"
 	espressoDouble  string = "double"
 	espressoTripple string = "triple"

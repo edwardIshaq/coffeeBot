@@ -93,6 +93,8 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 	feedback.Attachments = attachments
 	replyMessage(feedback, actionCallback.ResponseURL)
 
+	w.WriteHeader(http.StatusOK)
+
 	//Post to #cafeRequestsChannel
 	go postToCafeChannel(beverage, models.Order{}, actionCallback, api)
 
@@ -115,7 +117,7 @@ func postToCafeChannel(beverage *models.Beverage, order models.Order, actionCall
 		Attachments: []slack.Attachment{
 			slack.Attachment{
 				CallbackID: callbackID,
-				Fields:     beverage.CreateFields(),
+				Text:       beverage.HumanReadable(),
 				Actions: []slack.AttachmentAction{
 					slack.AttachmentAction{
 						Type:  "button",

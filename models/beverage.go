@@ -90,6 +90,22 @@ func (b *Beverage) UpdateDrink(name, comment string) {
 		Update("comment", comment)
 }
 
+// HumanReadable  fsdlkjsd
+func (b *Beverage) HumanReadable() string {
+	format := "%s %s %s"
+	args := []interface{}{b.Temperture, b.CupType, b.Espresso}
+
+	if b.Syrup != syrupNone {
+		format = format + " %s"
+		args = append(args, b.Syrup)
+	}
+	format = format + " %s \n%s"
+	args = append(args, b.Name)
+	args = append(args, b.Comment)
+
+	return fmt.Sprintf(format, args...)
+}
+
 // BeverageByID finds a beverage by ID (string)
 func BeverageByID(id string) Beverage {
 	bevID, err := strconv.Atoi(id)

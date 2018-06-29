@@ -27,6 +27,7 @@ import (
 var (
 	installer           *appInstaller
 	slashBarista        *slashCommand
+	beverageMenuHandler *bevMenuHandler
 	dialogHandler       *dialogInteraction
 	orderConfirmHandler *orderConfirmInteraction
 	saveBevAction       *saveBeverageInteraction
@@ -40,7 +41,10 @@ func init() {
 	interact = &interactive{}
 
 	slashBarista = baristaCommand()
-	interact.addComponent(slashBarista)
+	// interact.addComponent(slashBarista)
+
+	beverageMenuHandler = newBevMenuHndler()
+	interact.addComponent(beverageMenuHandler)
 
 	dialogHandler = beverageDialogInteraction()
 	interact.addComponent(dialogHandler)
