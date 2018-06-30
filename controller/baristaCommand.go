@@ -1,12 +1,5 @@
 package controller
 
-/*
-TODO:
-	- Embedd the dialogInteractionHandler object instead of repeating the callbackID and regex
-	- `handleCallback` is dedicated to one slash command and the class is made to look as a generic slash command ...
-	- Check regex in dialogInteractionHandler can probably extract the ID
-*/
-
 import (
 	"SlackPlatform/models"
 	"fmt"
