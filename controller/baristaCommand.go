@@ -11,7 +11,6 @@ import (
 	"SlackPlatform/models"
 	"fmt"
 	"net/http"
-	"regexp"
 
 	"github.com/edwardIshaq/slack"
 )
@@ -19,38 +18,21 @@ import (
 type slashCommand struct {
 	// user will invoke `/<slashCommand>` to call this function
 	slashCommand string
-	// command will generate an interactive component with `callbackID` callback
-	callbackID string
-	//Regex to match against callbacks
-	callbackRegex *regexp.Regexp
 }
 
 func baristaCommand() *slashCommand {
-	callbackID := "beverage_selection"
-	regex, _ := regexp.Compile(callbackID)
-	return &slashCommand{
-		slashCommand:  "coffeeCommand",
-		callbackID:    callbackID,
-		callbackRegex: regex,
-	}
-}
-
-func (s *slashCommand) canHandleCallback(callback string) bool {
-	return s.callbackRegex.MatchString(callback)
+	return &slashCommand{"coffeeCommand"}
 }
 
 func (s *slashCommand) registerRoutes() {
-	http.HandleFunc(s.route(), func(w http.ResponseWriter, r *http.Request) {
+	slashCommandRoute := "/" + s.slashCommand
+	http.HandleFunc(slashCommandRoute, func(w http.ResponseWriter, r *http.Request) {
 		if err := r.ParseForm(); err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 		s.sendBeverageMenu(w, r)
 	})
-}
-
-func (s *slashCommand) route() string {
-	return "/" + s.slashCommand
 }
 
 func (s *slashCommand) sendBeverageMenu(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +46,7 @@ func (s *slashCommand) sendBeverageMenu(w http.ResponseWriter, r *http.Request) 
 	attachment := slack.Attachment{
 		Fallback:   "Choose a beverage from the menu",
 		Color:      "#3AA3E3",
-		CallbackID: s.callbackID,
+		CallbackID: beverageMenuHandler.callbackID,
 	}
 
 	//User Beverages
@@ -117,53 +99,4 @@ func (s *slashCommand) sendBeverageMenu(w http.ResponseWriter, r *http.Request) 
 func menuFromBevs(bevs []models.Beverage) []slack.AttachmentActionOption {
 	bevsMap := models.MenuMap(bevs)
 	return models.MakeAttachmentOptionsFromMap(bevsMap)
-}
-
-func (s *slashCommand) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
-	_, ok := getSlackClientFromRequest(r)
-	if !ok {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-
-	r.ParseForm()
-
-	if len(actionCallback.Actions) < 1 {
-		return
-	}
-	if len(actionCallback.Actions[0].SelectedOptions) < 1 {
-		return
-	}
-
-	selectedBevID := actionCallback.Actions[0].SelectedOptions[0].Value
-	//Check if its a user defined beverage
-	selectedBeverage := models.BeverageByID(selectedBevID)
-	if !selectedBeverage.DefaultDrink {
-		//Create a new Order
-		order := models.SaveNewOrder(selectedBeverage)
-		//if it is send a feedback message
-		params := selectedBeverage.FeedbackMessage()
-		replyMessage(params, actionCallback.ResponseURL)
-
-		//Post to #cafeRequestsChannel
-		go postToCafeChannel(&selectedBeverage, order, actionCallback, api)
-
-		return
-	}
-
-	//udpate order with the triggerID so we can remove the menu message
-	SlashBaristaMsgID := actionCallback.MessageTs
-	triggerID := actionCallback.TriggerID
-	if len(SlashBaristaMsgID) > 0 {
-		order := models.OrderByBaristaMessageID(SlashBaristaMsgID)
-		order.DialogTriggerID = triggerID
-		order.BeverageID = selectedBeverage.ID
-		fmt.Printf("order = %v", order)
-		order.Save()
-	}
-
-	//Else picked one of the pre-defined bevs
-	//Time to customize it
-	dialog := selectedBeverage.MakeDialog(triggerID)
-	api.OpenDialog(dialog)
 }

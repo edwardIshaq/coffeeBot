@@ -135,7 +135,9 @@ func postToCafeChannel(beverage *models.Beverage, order models.Order, actionCall
 			},
 		},
 	}
-	title := fmt.Sprintf("New Order from *%s*", actionCallback.User.Name)
+
+	userText := fmt.Sprintf("<@%s|%s>", actionCallback.User.ID, actionCallback.User.Name)
+	title := fmt.Sprintf("New Order from %s", userText)
 	if _, _, err := api.PostMessage(cafeRequestsChannel, title, postParams); err != nil {
 		fmt.Printf("Error posting to #cafe_requests %v", err)
 	}

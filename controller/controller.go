@@ -41,7 +41,6 @@ func init() {
 	interact = &interactive{}
 
 	slashBarista = baristaCommand()
-	// interact.addComponent(slashBarista)
 
 	beverageMenuHandler = newBevMenuHndler()
 	interact.addComponent(beverageMenuHandler)
