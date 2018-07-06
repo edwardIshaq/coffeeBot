@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"fmt"
 	"net/http"
@@ -55,7 +56,12 @@ func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, 
 		replyMessage(params, actionCallback.ResponseURL)
 
 		//Post to #cafeRequestsChannel
-		go postToCafeChannel(&selectedBeverage, order, actionCallback, api)
+		stagingChannelID, ok := middleware.StagingChannelID(r.Context())
+		if !ok {
+			fmt.Println("Failed to get `stagingChannelID`")
+			return
+		}
+		go postToCafeChannel(stagingChannelID, &selectedBeverage, order, actionCallback, api)
 
 		return
 	}

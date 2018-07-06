@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"encoding/json"
 	"fmt"
@@ -9,10 +10,6 @@ import (
 	"regexp"
 
 	"github.com/edwardIshaq/slack"
-)
-
-const (
-	cafeRequestsChannel = "C0SCMST6C"
 )
 
 type dialogInteraction struct {
@@ -95,8 +92,13 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(http.StatusOK)
 
-	//Post to #cafeRequestsChannel
-	go postToCafeChannel(beverage, models.Order{}, actionCallback, api)
+	//Post to #stagingChannelID
+	stagingChannelID, ok := middleware.StagingChannelID(r.Context())
+	if !ok {
+		fmt.Println("Failed to get `stagingChannelID`")
+		return
+	}
+	go postToCafeChannel(stagingChannelID, beverage, models.Order{}, actionCallback, api)
 
 	channelID := actionCallback.Channel.ID
 	fmt.Printf("Now delete the menu message: %s %s", fetchedOrder.SlashBaristaMsgID, channelID)
@@ -110,7 +112,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 	// }(fetchedOrder.SlashBaristaMsgID, channelID, api)
 }
 
-func postToCafeChannel(beverage *models.Beverage, order models.Order, actionCallback slack.AttachmentActionCallback, api *slack.Client) {
+func postToCafeChannel(stagingChannelID string, beverage *models.Beverage, order models.Order, actionCallback slack.AttachmentActionCallback, api *slack.Client) {
 	callbackID := "order.confirmOrCancel"
 	actionValue := fmt.Sprintf("%d", order.ID)
 	postParams := slack.PostMessageParameters{
@@ -138,7 +140,7 @@ func postToCafeChannel(beverage *models.Beverage, order models.Order, actionCall
 
 	userText := fmt.Sprintf("<@%s|%s>", actionCallback.User.ID, actionCallback.User.Name)
 	title := fmt.Sprintf("New Order from %s", userText)
-	if _, _, err := api.PostMessage(cafeRequestsChannel, title, postParams); err != nil {
+	if _, _, err := api.PostMessage(stagingChannelID, title, postParams); err != nil {
 		fmt.Printf("Error posting to #cafe_requests %v", err)
 	}
 }
