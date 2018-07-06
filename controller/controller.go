@@ -1,19 +1,13 @@
 package controller
 
 /*
-This will support a basic play grounds for the `utaApp` found at the link below.string
 
 add to slack button:	/addToSlack
 OAuth handlers:			/oauthRedirect
 outgoing hook url: 		/outgoingHooks
 /barista command url:	/coffeeCommand
 interactive url:		/interactive
-Dynamic Menu:			/dynamicMenu
 
-TODO:
-------------------------------------------
-[√] save tokens to DB
-[√] Add runtime flag to switch between dev/prod
 */
 
 import (
@@ -26,6 +20,7 @@ import (
 
 var (
 	installer           *appInstaller
+	appSettings         *settings
 	slashBarista        *slashCommand
 	beverageMenuHandler *bevMenuHandler
 	dialogHandler       *dialogInteraction
@@ -39,8 +34,10 @@ var (
 func init() {
 	installer = defaultApp()
 	interact = &interactive{}
-
 	slashBarista = baristaCommand()
+
+	appSettings = newSettings()
+	interact.addComponent(appSettings)
 
 	beverageMenuHandler = newBevMenuHndler()
 	interact.addComponent(beverageMenuHandler)
@@ -48,7 +45,7 @@ func init() {
 	dialogHandler = beverageDialogInteraction()
 	interact.addComponent(dialogHandler)
 
-	saveBevAction = saveBevInteraction()
+	saveBevAction = newSaveBevInteraction()
 	interact.addComponent(saveBevAction)
 
 	orderConfirmHandler = newOrderConfirm()

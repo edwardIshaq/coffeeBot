@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"fmt"
 	"net/http"
@@ -36,6 +37,17 @@ func (s *slashCommand) sendBeverageMenu(w http.ResponseWriter, r *http.Request) 
 	}
 
 	channelID := r.PostFormValue("channel_id")
+	triggerID := r.PostFormValue("trigger_id")
+	//Check if stagingChannel Exists
+	_, ok = middleware.StagingChannelID(r.Context())
+
+	if !ok {
+		fmt.Printf("invoke the settings controller")
+		appSettings.sendSettingsDialog(channelID, triggerID)
+		// appSettings.createChannels(channelID)
+		return
+	}
+
 	attachment := slack.Attachment{
 		Fallback:   "Choose a beverage from the menu",
 		Color:      "#3AA3E3",

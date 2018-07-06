@@ -16,8 +16,10 @@ type TeamScope struct {
 type contextKey string
 
 const (
-	contextAccessTokenKey = contextKey("TeamScope.context.accessTokenKey")
-	contextSlackAPIKey    = contextKey("TeamScope.context.slackAPI")
+	contextAccessTokenKey         = contextKey("TeamScope.context.accessTokenKey")
+	contextSlackAPIKey            = contextKey("TeamScope.context.slackAPI")
+	contextStagingChannelIDKey    = contextKey("TeamScope.context.stagingChannelID")
+	contextProductionChannelIDKey = contextKey("TeamScope.context.productionChannelID")
 )
 
 func (mw *TeamScope) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -28,6 +30,8 @@ func (mw *TeamScope) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	team := crossfunction.TeamForRequest(r)
 	if team != nil && len(team.AccessToken) > 0 {
 		ctx := context.WithValue(r.Context(), contextAccessTokenKey, team.AccessToken)
+		ctx = context.WithValue(ctx, contextStagingChannelIDKey, team.StagingChannelID)
+		ctx = context.WithValue(ctx, contextProductionChannelIDKey, team.ProductionChannelID)
 		slackAPI := slack.New(team.AccessToken)
 		slackAPI.SetDebug(true)
 		ctx = context.WithValue(ctx, contextSlackAPIKey, slackAPI)
@@ -48,4 +52,18 @@ func AccessToken(ctx context.Context) (string, bool) {
 func SlackAPI(ctx context.Context) (*slack.Client, bool) {
 	slackAPI, ok := ctx.Value(contextSlackAPIKey).(*slack.Client)
 	return slackAPI, ok
+}
+
+// StagingChannelID extracts stagingChannelID from the context
+func StagingChannelID(ctx context.Context) (string, bool) {
+	stagingChannelID, ok := ctx.Value(contextStagingChannelIDKey).(string)
+	ok = len(stagingChannelID) > 0 && ok
+	return stagingChannelID, ok
+}
+
+// ProductionChannelID extracts stagingChannelID from the context
+func ProductionChannelID(ctx context.Context) (string, bool) {
+	prodChannelID, ok := ctx.Value(contextProductionChannelIDKey).(string)
+	ok = len(prodChannelID) > 0 && ok
+	return prodChannelID, ok
 }

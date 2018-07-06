@@ -23,7 +23,7 @@ type saveBeverageInteraction struct {
 	callbackRegex *regexp.Regexp
 }
 
-func saveBevInteraction() *saveBeverageInteraction {
+func newSaveBevInteraction() *saveBeverageInteraction {
 	callbackID := "NameBeverageOrCancelOrder"
 	pattern := `NameBeverageOrCancelOrder|NameBeverage\.(\d*)`
 	regex, _ := regexp.Compile(pattern)
