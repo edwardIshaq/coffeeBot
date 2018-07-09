@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SlackPlatform/middleware"
 	"SlackPlatform/models"
 	"fmt"
 	"net/http"
@@ -68,6 +69,30 @@ func handleConfirm(r *http.Request, actionCallback slack.AttachmentActionCallbac
 	updateOption := slack.MsgOptionUpdate(updatedMessage.Timestamp)
 	getSlackClientFromRequest(r)
 	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)
+
+	//Post to #ProductionChannelID channel
+	prodChannelID, ok := middleware.ProductionChannelID(r.Context())
+	if !ok {
+		fmt.Println("Failed to get `ProductionChannelID`")
+		return
+	}
+
+	// add ready and cancel buttons
+	readyButton := slack.AttachmentAction{
+		Type: "button",
+		Name: "order_ready",
+		Text: "Ready to pickup",
+	}
+	cancelButton := slack.AttachmentAction{
+		Type: "button",
+		Name: "order_cancelled",
+		Text: "Cancel order",
+	}
+	attachment.Actions = []slack.AttachmentAction{readyButton, cancelButton}
+	attachmentOption = slack.MsgOptionAttachments(attachment)
+	sendOption := slack.MsgOptionPost()
+	api.SendMessage(prodChannelID, sendOption, msgOption, attachmentOption)
+
 }
 
 func handleCancel(r *http.Request, actionCallback slack.AttachmentActionCallback, order models.Order) {
