@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-
-	"github.com/edwardIshaq/slack"
 )
 
 type bevMenuHandler struct {
@@ -29,7 +27,7 @@ func (b *bevMenuHandler) canHandleCallback(callback string) bool {
 	return b.callbackRegex.MatchString(callback)
 }
 
-func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
+func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
 	_, ok := getSlackClientFromRequest(r)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)

@@ -37,7 +37,7 @@ func (d *saveBeverageInteraction) canHandleCallback(callback string) bool {
 	return d.callbackRegex.MatchString(callback)
 }
 
-func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
+func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
 	switch actionCallback.CallbackID {
 	case "NameBeverageOrCancelOrder":
 		d.handleButtonPressed(r, actionCallback)
@@ -57,7 +57,7 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 
 }
 
-func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCallback slack.AttachmentActionCallback) {
+func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCallback SlackActionCallback) {
 	if len(actionCallback.Actions) != 1 {
 		fmt.Printf("\nExpecting 1 Action got %v", actionCallback.Actions)
 		return
@@ -82,7 +82,7 @@ func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCal
 func (d *saveBeverageInteraction) handleSaveNameCallback(w http.ResponseWriter,
 	r *http.Request,
 	submitCallback slack.DialogSubmitCallback,
-	actionCallback slack.AttachmentActionCallback) {
+	actionCallback SlackActionCallback) {
 
 	matches := d.callbackRegex.FindStringSubmatch(submitCallback.CallbackID)
 	if len(matches) < 2 {

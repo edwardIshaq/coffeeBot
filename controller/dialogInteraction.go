@@ -34,7 +34,7 @@ func (d *dialogInteraction) canHandleCallback(callback string) bool {
 	return d.callbackRegex.MatchString(callback)
 }
 
-func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
+func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
 	matches := d.callbackRegex.FindStringSubmatch(actionCallback.CallbackID)
 	if len(matches) < 2 {
 		fmt.Printf("no triggerID found on: %s", actionCallback.CallbackID)
@@ -112,7 +112,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 	// }(fetchedOrder.SlashBaristaMsgID, channelID, api)
 }
 
-func postToCafeChannel(stagingChannelID string, beverage *models.Beverage, order models.Order, actionCallback slack.AttachmentActionCallback, api *slack.Client) {
+func postToCafeChannel(stagingChannelID string, beverage *models.Beverage, order models.Order, actionCallback SlackActionCallback, api *slack.Client) {
 	callbackID := "order.confirmOrCancel"
 	actionValue := fmt.Sprintf("%d", order.ID)
 	postParams := slack.PostMessageParameters{

@@ -47,7 +47,7 @@ func (s *settings) canHandleCallback(callback string) bool {
 	return s.callbackRegex.MatchString(callback)
 }
 
-func (s *settings) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
+func (s *settings) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
 	_, ok := getSlackClientFromRequest(r)
 	if !ok {
 		w.WriteHeader(http.StatusUnauthorized)

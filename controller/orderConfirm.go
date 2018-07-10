@@ -34,7 +34,7 @@ func (o *orderConfirmInteraction) callbackForID(beverageID uint) string {
 	return fmt.Sprintf("%s.%d", o.callbackID, beverageID)
 }
 
-func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback slack.AttachmentActionCallback) {
+func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
 	action := actionCallback.Actions[0]
 	order := models.OrderByID(action.Value)
 
@@ -51,7 +51,7 @@ func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.
 
 }
 
-func handleConfirm(r *http.Request, actionCallback slack.AttachmentActionCallback, order models.Order) {
+func handleConfirm(r *http.Request, actionCallback SlackActionCallback, order models.Order) {
 	order.Confirm()
 	updatedMessage := actionCallback.OriginalMessage
 	if len(updatedMessage.Attachments) < 1 {
@@ -89,13 +89,13 @@ func handleConfirm(r *http.Request, actionCallback slack.AttachmentActionCallbac
 		Text: "Cancel order",
 	}
 	attachment.Actions = []slack.AttachmentAction{readyButton, cancelButton}
+	attachment.CallbackID = "production_handler"
 	attachmentOption = slack.MsgOptionAttachments(attachment)
 	sendOption := slack.MsgOptionPost()
 	api.SendMessage(prodChannelID, sendOption, msgOption, attachmentOption)
-
 }
 
-func handleCancel(r *http.Request, actionCallback slack.AttachmentActionCallback, order models.Order) {
+func handleCancel(r *http.Request, actionCallback SlackActionCallback, order models.Order) {
 	order.Cancel()
 	updatedMessage := actionCallback.OriginalMessage
 	if len(updatedMessage.Attachments) < 1 {

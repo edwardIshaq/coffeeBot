@@ -14,6 +14,9 @@ import (
 	"github.com/edwardIshaq/slack"
 )
 
+// SlackActionCallback type alias
+type SlackActionCallback = slack.AttachmentActionCallback
+
 type interactive struct {
 	components []interactiveComponent
 }
@@ -24,7 +27,7 @@ func (i *interactive) addComponent(comp interactiveComponent) {
 
 type interactiveComponent interface {
 	canHandleCallback(string) bool
-	handleCallback(http.ResponseWriter, *http.Request, slack.AttachmentActionCallback)
+	handleCallback(http.ResponseWriter, *http.Request, SlackActionCallback)
 }
 
 func (i *interactive) registerRoutes() {
@@ -76,9 +79,9 @@ func replyMessage(params *slack.Msg, responseURL string) {
 	defer resp.Body.Close()
 }
 
-func parseAttachmentActionCallback(r *http.Request) slack.AttachmentActionCallback {
+func parseAttachmentActionCallback(r *http.Request) SlackActionCallback {
 	payload := r.PostFormValue("payload")
-	actionCallback := slack.AttachmentActionCallback{}
+	actionCallback := SlackActionCallback{}
 	json.Unmarshal([]byte(payload), &actionCallback)
 	return actionCallback
 }
