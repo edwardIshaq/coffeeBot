@@ -24,6 +24,7 @@ var (
 	slashBarista        *slashCommand
 	beverageMenuHandler *bevMenuHandler
 	dialogHandler       *dialogInteraction
+	productionHandler   *productionController
 	orderConfirmHandler *orderConfirmInteraction
 	saveBevAction       *saveBeverageInteraction
 	interact            *interactive
@@ -50,6 +51,9 @@ func init() {
 
 	orderConfirmHandler = newOrderConfirm()
 	interact.addComponent(orderConfirmHandler)
+
+	productionHandler = newProductionHandler()
+	interact.addComponent(productionHandler)
 }
 
 // StartupControllers call this function to setup the controllers
