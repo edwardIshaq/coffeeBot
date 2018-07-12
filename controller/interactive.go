@@ -52,8 +52,7 @@ func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// payload := r.PostFormValue("payload")
-	// fmt.Printf("payload= %v\n", payload)
+	fmt.Printf("NO handler found for %v", actionCallback)
 	http.NotFound(w, r)
 }
 

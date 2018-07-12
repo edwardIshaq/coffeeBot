@@ -13,8 +13,8 @@ import (
 /*
 Todo:
 [ ] Rename the interactions to somethig shorter
-[ ] Display Drink Name in the title
-[ ] Show a confirmation after saving
+[√] Display Drink Name in the title
+[√] Show a confirmation after saving
 */
 type saveBeverageInteraction struct {
 	// command will generate an interactive component with `callbackID` callback

@@ -98,7 +98,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 		fmt.Println("Failed to get `stagingChannelID`")
 		return
 	}
-	go postToCafeChannel(stagingChannelID, beverage, models.Order{}, actionCallback, api)
+	go postToStagingChannel(stagingChannelID, beverage, models.Order{}, actionCallback, api)
 
 	channelID := actionCallback.Channel.ID
 	fmt.Printf("Now delete the menu message: %s %s", fetchedOrder.SlashBaristaMsgID, channelID)
@@ -112,7 +112,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 	// }(fetchedOrder.SlashBaristaMsgID, channelID, api)
 }
 
-func postToCafeChannel(stagingChannelID string, beverage *models.Beverage, order models.Order, actionCallback SlackActionCallback, api *slack.Client) {
+func postToStagingChannel(stagingChannelID string, beverage *models.Beverage, order models.Order, actionCallback SlackActionCallback, api *slack.Client) {
 	callbackID := "order.confirmOrCancel"
 	actionValue := fmt.Sprintf("%d", order.ID)
 	postParams := slack.PostMessageParameters{

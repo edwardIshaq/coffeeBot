@@ -43,13 +43,16 @@ func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
+	SlashBaristaMsgID := actionCallback.MessageTs
 	selectedBevID := actionCallback.Actions[0].SelectedOptions[0].Value
-	//Check if its a user defined beverage
 	selectedBeverage := models.BeverageByID(selectedBevID)
+
+	order := models.OrderByBaristaMessageID(SlashBaristaMsgID)
+	order.BeverageID = selectedBeverage.ID
+
+	//Check if its a user defined beverage
 	if !selectedBeverage.DefaultDrink {
-		//Create a new Order
-		order := models.SaveNewOrder(selectedBeverage)
-		//if it is send a feedback message
+		//its a customized drink -> send a feedback message
 		params := selectedBeverage.FeedbackMessage()
 		replyMessage(params, actionCallback.ResponseURL)
 
@@ -59,24 +62,21 @@ func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, 
 			fmt.Println("Failed to get `stagingChannelID`")
 			return
 		}
-		go postToCafeChannel(stagingChannelID, &selectedBeverage, order, actionCallback, api)
-
+		go postToStagingChannel(stagingChannelID, &selectedBeverage, order, actionCallback, api)
 		return
 	}
 
 	//udpate order with the triggerID so we can remove the menu message
-	SlashBaristaMsgID := actionCallback.MessageTs
 	triggerID := actionCallback.TriggerID
 	if len(SlashBaristaMsgID) > 0 {
-		order := models.OrderByBaristaMessageID(SlashBaristaMsgID)
 		order.DialogTriggerID = triggerID
-		order.BeverageID = selectedBeverage.ID
 		fmt.Printf("order = %v", order)
 		order.Save()
 	}
 
-	//Else picked one of the pre-defined bevs
+	//Else picked a `DefaultDrink`
 	//Time to customize it
+	//FIXME: Move to `dialogInteraction.go`
 	dialog := selectedBeverage.MakeDialog(triggerID)
 	api.OpenDialog(dialog)
 }
