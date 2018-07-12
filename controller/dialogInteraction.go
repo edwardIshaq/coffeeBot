@@ -98,7 +98,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 		fmt.Println("Failed to get `stagingChannelID`")
 		return
 	}
-	go postToStagingChannel(stagingChannelID, beverage, models.Order{}, actionCallback, api)
+	go orderConfirmHandler.postToStagingChannel(stagingChannelID, beverage, models.Order{}, actionCallback, api)
 
 	channelID := actionCallback.Channel.ID
 	fmt.Printf("Now delete the menu message: %s %s", fetchedOrder.SlashBaristaMsgID, channelID)
@@ -110,37 +110,4 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 	// 	str1, str2, err := api.DeleteMessage(slashBaristaMsgID, channelID)
 	// 	fmt.Printf("%s | %s | %v", str1, str2, err)
 	// }(fetchedOrder.SlashBaristaMsgID, channelID, api)
-}
-
-func postToStagingChannel(stagingChannelID string, beverage *models.Beverage, order models.Order, actionCallback SlackActionCallback, api *slack.Client) {
-	callbackID := "order.confirmOrCancel"
-	actionValue := fmt.Sprintf("%d", order.ID)
-	postParams := slack.PostMessageParameters{
-		Attachments: []slack.Attachment{
-			slack.Attachment{
-				CallbackID: callbackID,
-				Text:       beverage.HumanReadable(),
-				Actions: []slack.AttachmentAction{
-					slack.AttachmentAction{
-						Type:  "button",
-						Text:  "Confirm Order",
-						Name:  "confirm_beverage",
-						Value: actionValue,
-					},
-					slack.AttachmentAction{
-						Type:  "button",
-						Text:  "Cancel Order",
-						Name:  "cancel_beverage",
-						Value: actionValue,
-					},
-				},
-			},
-		},
-	}
-
-	userText := fmt.Sprintf("<@%s|%s>", actionCallback.User.ID, actionCallback.User.Name)
-	title := fmt.Sprintf("New Order from %s", userText)
-	if _, _, err := api.PostMessage(stagingChannelID, title, postParams); err != nil {
-		fmt.Printf("Error posting to #cafe_requests %v", err)
-	}
 }

@@ -34,6 +34,39 @@ func (o *orderConfirmInteraction) callbackForID(beverageID uint) string {
 	return fmt.Sprintf("%s.%d", o.callbackID, beverageID)
 }
 
+func (o *orderConfirmInteraction) postToStagingChannel(stagingChannelID string, beverage *models.Beverage, order models.Order, actionCallback SlackActionCallback, api *slack.Client) {
+	callbackID := "order.confirmOrCancel"
+	actionValue := fmt.Sprintf("%d", order.ID)
+	postParams := slack.PostMessageParameters{
+		Attachments: []slack.Attachment{
+			slack.Attachment{
+				CallbackID: callbackID,
+				Text:       beverage.HumanReadable(),
+				Actions: []slack.AttachmentAction{
+					slack.AttachmentAction{
+						Type:  "button",
+						Text:  "Confirm Order",
+						Name:  "confirm_beverage",
+						Value: actionValue,
+					},
+					slack.AttachmentAction{
+						Type:  "button",
+						Text:  "Cancel Order",
+						Name:  "cancel_beverage",
+						Value: actionValue,
+					},
+				},
+			},
+		},
+	}
+
+	userText := fmt.Sprintf("<@%s|%s>", actionCallback.User.ID, actionCallback.User.Name)
+	title := fmt.Sprintf("New Order from %s", userText)
+	if _, _, err := api.PostMessage(stagingChannelID, title, postParams); err != nil {
+		fmt.Printf("Error posting to #cafe_requests %v", err)
+	}
+}
+
 func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
 	action := actionCallback.Actions[0]
 	order := models.OrderByID(action.Value)

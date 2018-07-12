@@ -62,7 +62,7 @@ func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, 
 			fmt.Println("Failed to get `stagingChannelID`")
 			return
 		}
-		go postToStagingChannel(stagingChannelID, &selectedBeverage, order, actionCallback, api)
+		go orderConfirmHandler.postToStagingChannel(stagingChannelID, &selectedBeverage, order, actionCallback, api)
 		return
 	}
 

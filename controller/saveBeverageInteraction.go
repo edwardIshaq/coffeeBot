@@ -43,7 +43,8 @@ func (d *saveBeverageInteraction) handleCallback(w http.ResponseWriter, r *http.
 		d.handleButtonPressed(r, actionCallback)
 
 	default:
-		//NameBeverage.<Beverage.ID>
+		//Handle beverage Name & Comment save dialog
+		//from callback: NameBeverage.<Beverage.ID>
 		if len(actionCallback.Actions) == 0 {
 			dialogResponse := slack.DialogSubmitCallback{}
 			json.Unmarshal([]byte(r.PostFormValue("payload")), &dialogResponse)
