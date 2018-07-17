@@ -2,7 +2,11 @@ package controller
 
 import (
 	"SlackPlatform/models"
+	"fmt"
 	"net/http"
+	"strconv"
+
+	"github.com/edwardIshaq/slack"
 )
 
 type productionController struct {
@@ -23,4 +27,12 @@ func (p *productionController) handleCallback(w http.ResponseWriter, r *http.Req
 	fetchedOrder := orderQuery.Fetch()
 	fetchedOrder.IsFulfilled = true
 	fetchedOrder.Save()
+
+	bevID := strconv.FormatUint(uint64(fetchedOrder.BeverageID), 10)
+	beverage := models.BeverageByID(bevID)
+	userIDToNotify := beverage.UserID
+	postParams := slack.NewPostMessageParameters()
+	postParams.Channel = userIDToNotify
+	messageText := fmt.Sprintf("your order of `%s` is ready to pickup", beverage.Name)
+	api.PostMessage(userIDToNotify, messageText, postParams)
 }
