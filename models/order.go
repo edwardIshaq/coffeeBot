@@ -10,9 +10,12 @@ import (
 type Order struct {
 	gorm.Model
 
+	//Slack flow
 	SlashBaristaMsgID string
 	DialogTriggerID   string
 	BeverageID        uint
+	StagingMsgID      string
+	ProdMsgID         string
 
 	IsConfirmed bool
 	IsFulfilled bool

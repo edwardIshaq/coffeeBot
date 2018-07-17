@@ -62,9 +62,14 @@ func (o *orderConfirmInteraction) postToStagingChannel(stagingChannelID string, 
 
 	userText := fmt.Sprintf("<@%s|%s>", actionCallback.User.ID, actionCallback.User.Name)
 	title := fmt.Sprintf("New Order from %s", userText)
-	if _, _, err := api.PostMessage(stagingChannelID, title, postParams); err != nil {
+	_, respTimestamp, err := api.PostMessage(stagingChannelID, title, postParams)
+	if err != nil {
 		fmt.Printf("Error posting to #cafe_requests %v", err)
+		return
 	}
+	order.StagingMsgID = respTimestamp
+	order.Save()
+	fmt.Printf("respTimestamp = %s", respTimestamp)
 }
 
 func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
@@ -103,6 +108,7 @@ func handleConfirm(r *http.Request, actionCallback SlackActionCallback, order mo
 	getSlackClientFromRequest(r)
 	api.SendMessage(actionCallback.Channel.ID, updateOption, msgOption, attachmentOption)
 
+	//Split into a seperate function
 	//Post to #ProductionChannelID channel
 	prodChannelID, ok := middleware.ProductionChannelID(r.Context())
 	if !ok {
@@ -125,7 +131,15 @@ func handleConfirm(r *http.Request, actionCallback SlackActionCallback, order mo
 	attachment.CallbackID = "production_handler"
 	attachmentOption = slack.MsgOptionAttachments(attachment)
 	sendOption := slack.MsgOptionPost()
-	api.SendMessage(prodChannelID, sendOption, msgOption, attachmentOption)
+
+	_, respTimestamp, _, err := api.SendMessage(prodChannelID, sendOption, msgOption, attachmentOption)
+	if err != nil {
+		fmt.Printf("\nError posting to prod channel %v", err)
+		return
+	}
+
+	order.ProdMsgID = respTimestamp
+	order.Save()
 }
 
 func handleCancel(r *http.Request, actionCallback SlackActionCallback, order models.Order) {
