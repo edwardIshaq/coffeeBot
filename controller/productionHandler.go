@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"SlackPlatform/models"
 	"net/http"
 )
 
@@ -18,4 +19,8 @@ func newProductionHandler() *productionController {
 func (p *productionController) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
 	p.interactiveController.handleCallback(w, r, actionCallback)
 
+	orderQuery := models.Order{ProdMsgID: actionCallback.MessageTs}
+	fetchedOrder := orderQuery.Fetch()
+	fetchedOrder.IsFulfilled = true
+	fetchedOrder.Save()
 }

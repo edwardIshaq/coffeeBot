@@ -67,6 +67,7 @@ func OrderByID(id string) Order {
 }
 
 // Confirm update the model to be confirmed
+// FIXME: Not working properly !!!
 func (o Order) Confirm() {
 	o.IsConfirmed = true
 	db.Save(o)

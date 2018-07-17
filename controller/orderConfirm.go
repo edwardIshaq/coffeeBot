@@ -90,7 +90,10 @@ func (o *orderConfirmInteraction) handleCallback(w http.ResponseWriter, r *http.
 }
 
 func handleConfirm(r *http.Request, actionCallback SlackActionCallback, order models.Order) {
-	order.Confirm()
+	// order.Confirm()
+	order.IsConfirmed = true
+	order.Save()
+
 	updatedMessage := actionCallback.OriginalMessage
 	if len(updatedMessage.Attachments) < 1 {
 		fmt.Println("Has no attachments")
