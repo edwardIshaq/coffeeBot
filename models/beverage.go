@@ -76,7 +76,6 @@ func saveBeverage(submission map[string]string, userID string, templateBeverage 
 	}
 
 	//Override defaults
-	templateBeverage.ID = 0
 	templateBeverage.UserID = userID
 	templateBeverage.DefaultDrink = false
 	db.Create(&templateBeverage)

@@ -22,12 +22,12 @@ type Order struct {
 }
 
 // NewBaristaCommandOrder Creates an order in the DB with the /barista messageID
-func NewBaristaCommandOrder(baristaMessageID string) Order {
+func NewBaristaCommandOrder(baristaMessageID string) *Order {
 	order := Order{
 		SlashBaristaMsgID: baristaMessageID,
 	}
 	db.Create(&order)
-	return order
+	return &order
 }
 
 // OrderByBaristaMessageID finds a beverage by BaristaCommandMessageID
