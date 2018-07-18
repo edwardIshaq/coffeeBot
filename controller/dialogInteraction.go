@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 
 	"github.com/edwardIshaq/slack"
 )
@@ -45,7 +46,6 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 	triggerID := matches[1]
 	orderQuery := models.Order{DialogTriggerID: triggerID}
 	fetchedOrder := orderQuery.Fetch()
-	fmt.Printf("fetched = %v", fetchedOrder)
 	if fetchedOrder == nil {
 		fmt.Printf("Couldn't find a matching order %v", actionCallback)
 		return
@@ -61,8 +61,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// order := models.SaveNewOrder(*beverage)
-	orderID := fmt.Sprintf("%d", fetchedOrder.ID)
+	orderID := strconv.FormatInt(int64(fetchedOrder.ID), 10)
 
 	//post feedback message to user
 	feedback := beverage.FeedbackMessage()
@@ -98,7 +97,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 		fmt.Println("Failed to get `stagingChannelID`")
 		return
 	}
-	go orderConfirmHandler.postToStagingChannel(stagingChannelID, beverage, models.Order{}, actionCallback, api)
+	go orderConfirmHandler.postToStagingChannel(stagingChannelID, beverage, *fetchedOrder, actionCallback, api)
 
 	channelID := actionCallback.Channel.ID
 	fmt.Printf("Now delete the menu message: %s %s", fetchedOrder.SlashBaristaMsgID, channelID)
