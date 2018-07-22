@@ -60,7 +60,8 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 		log.Println("Failed to save a new beverage")
 		return
 	}
-
+	fetchedOrder.BeverageID = beverage.ID
+	fetchedOrder.Save()
 	orderID := strconv.FormatInt(int64(fetchedOrder.ID), 10)
 
 	//post feedback message to user

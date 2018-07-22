@@ -25,16 +25,6 @@ type Beverage struct {
 	UserID         string
 }
 
-func newBeverage(name, espresso, syrup, cup string) Beverage {
-	return Beverage{
-		Name:       name,
-		Espresso:   string(espresso),
-		Syrup:      string(syrup),
-		Temperture: string(tempHot),
-		CupType:    string(cup),
-	}
-}
-
 func setField(obj interface{}, name string, value interface{}) error {
 	structValue := reflect.ValueOf(obj).Elem()
 	structFieldValue := structValue.FieldByName(name)
@@ -74,11 +64,14 @@ func saveBeverage(submission map[string]string, userID string, templateBeverage 
 		fmt.Printf("\nError creating `Beverage`: %v", err)
 		return nil
 	}
-
 	//Override defaults
+	newRecordResult := db.NewRecord(&templateBeverage)
+	fmt.Printf("\ncreated new record %t", newRecordResult)
+	templateBeverage.ID = 0
 	templateBeverage.UserID = userID
 	templateBeverage.DefaultDrink = false
 	db.Create(&templateBeverage)
+	fmt.Printf("Created Beverage: %v", templateBeverage)
 	return &templateBeverage
 }
 

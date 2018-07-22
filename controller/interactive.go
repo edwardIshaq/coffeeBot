@@ -46,7 +46,7 @@ func (i *interactive) callbackHandler(callbackID string) interactiveComponent {
 func (i *interactive) handleInteractiveMessages(w http.ResponseWriter, r *http.Request) {
 	// Scan `components` to see who can hanle this callbackID
 	actionCallback := parseAttachmentActionCallback(r)
-	fmt.Println("Received interactive callback", debugJSON(actionCallback))
+	//fmt.Println("Received interactive callback", debugJSON(actionCallback))
 	if comp := i.callbackHandler(actionCallback.CallbackID); comp != nil {
 		comp.handleCallback(w, r, actionCallback)
 		return
