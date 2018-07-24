@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"strconv"
 
 	"github.com/edwardIshaq/slack"
 )
@@ -62,7 +61,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 	}
 	fetchedOrder.BeverageID = beverage.ID
 	fetchedOrder.Save()
-	orderID := strconv.FormatInt(int64(fetchedOrder.ID), 10)
+	orderID := fmt.Sprintf("%d", fetchedOrder.ID)
 
 	//post feedback message to user
 	feedback := beverage.FeedbackMessage()
