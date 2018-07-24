@@ -28,8 +28,7 @@ func (b *bevMenuHandler) canHandleCallback(callback string) bool {
 }
 
 func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, actionCallback SlackActionCallback) {
-	_, ok := getSlackClientFromRequest(r)
-	if !ok {
+	if _, ok := getSlackClientFromRequest(r); !ok {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -70,7 +69,6 @@ func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, 
 	triggerID := actionCallback.TriggerID
 	if len(SlashBaristaMsgID) > 0 {
 		order.DialogTriggerID = triggerID
-		fmt.Printf("order = %v", order)
 		order.Save()
 	}
 
@@ -79,4 +77,7 @@ func (b *bevMenuHandler) handleCallback(w http.ResponseWriter, r *http.Request, 
 	//FIXME: Move to `dialogInteraction.go`
 	dialog := selectedBeverage.MakeDialog(triggerID)
 	api.OpenDialog(dialog)
+
+	// respChannel, respTimestamp, err := api.DeleteMessage(actionCallback.Channel.ID, SlashBaristaMsgID)
+	// fmt.Printf("%s %s %v", respChannel, respTimestamp, err)
 }
