@@ -74,7 +74,7 @@ func (d *dialogInteraction) handleCallback(w http.ResponseWriter, r *http.Reques
 				Name:  "SaveButton",
 				Text:  "Save",
 				Type:  "button",
-				Value: bevID,
+				Value: orderID,
 			},
 			//Cancel Order
 			slack.AttachmentAction{

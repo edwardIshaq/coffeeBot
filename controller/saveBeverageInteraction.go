@@ -67,7 +67,9 @@ func (d *saveBeverageInteraction) handleButtonPressed(r *http.Request, actionCal
 	action := actionCallback.Actions[0]
 	switch action.Name {
 	case "SaveButton":
-		beverage := models.BeverageByID(action.Value)
+		order := models.OrderByID(action.Value)
+		bevID := fmt.Sprintf("%d", order.BeverageID)
+		beverage := models.BeverageByID(bevID)
 		dialog := beverage.MakeSaveNameDialog()
 		dialog.TriggerID = actionCallback.TriggerID
 		getSlackClientFromRequest(r)
