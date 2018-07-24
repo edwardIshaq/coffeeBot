@@ -23,23 +23,15 @@ const (
 )
 
 type chatResponseFull struct {
-	Channel          string `json:"channel"`
-	Timestamp        string `json:"ts"`
-	MessageTimeStamp string `json:"message_ts"`
-	Text             string `json:"text"`
+	Channel   string `json:"channel"`
+	Timestamp string `json:"ts"`
+	Text      string `json:"text"`
 	SlackResponse
-}
-
-func (c chatResponseFull) getMessageTimestamp() string {
-	if len(c.Timestamp) > 0 {
-		return c.Timestamp
-	}
-	return c.MessageTimeStamp
 }
 
 // PostMessageParameters contains all the parameters necessary (including the optional ones) for a PostMessage() request
 type PostMessageParameters struct {
-	Username        string       `json:"username"`
+	Username        string       `json:"user_name"`
 	AsUser          bool         `json:"as_user"`
 	Parse           string       `json:"parse"`
 	ThreadTimestamp string       `json:"thread_ts"`
@@ -165,7 +157,7 @@ func (api *Client) SendMessageContext(ctx context.Context, channelID string, opt
 		return "", "", "", err
 	}
 
-	return response.Channel, response.getMessageTimestamp(), response.Text, response.Err()
+	return response.Channel, response.Timestamp, response.Text, response.Err()
 }
 
 // ApplyMsgOptions utility function for debugging/testing chat requests.
@@ -335,27 +327,6 @@ func MsgOptionDisableMediaUnfurl() MsgOption {
 func MsgOptionDisableMarkdown() MsgOption {
 	return func(config *sendConfig) error {
 		config.values.Set("mrkdwn", "false")
-		return nil
-	}
-}
-
-// this function combines multiple options into a single option.
-func MsgOptionCompose(options ...MsgOption) MsgOption {
-	return func(c *sendConfig) error {
-		for _, opt := range options {
-			if err := opt(c); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-}
-
-func MsgOptionParse(b bool) MsgOption {
-	return func(c *sendConfig) error {
-		var v string
-		if b { v = "1" } else { v = "0" }
-		c.values.Set("parse", v)
 		return nil
 	}
 }

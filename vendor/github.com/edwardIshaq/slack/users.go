@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net/url"
 	"strconv"
 )
@@ -168,11 +169,11 @@ type TeamIdentity struct {
 }
 
 type userResponseFull struct {
-	Members      []User        `json:"members,omitempty"`
-	User                       `json:"user,omitempty"`
-	UserPresence                        
+	Members      []User                  `json:"members,omitempty"` // ListUsers
+	User         `json:"user,omitempty"` // GetUserInfo
+	UserPresence                         // GetUserPresence
 	SlackResponse
-	Metadata ResponseMetadata `json:"response_metadata"`
+	Metadata ResponseMetadata
 }
 
 type UserSetPhotoParams struct {
@@ -311,6 +312,7 @@ func (t UserPagination) Next(ctx context.Context) (_ UserPagination, err error) 
 	}
 
 	if resp, err = userRequest(ctx, t.c.httpclient, "users.list", values, t.c.debug); err != nil {
+		log.Println("error during user request", err)
 		return t, err
 	}
 

@@ -11,7 +11,7 @@ import (
 )
 
 // Added as a var so that we can change this for testing purposes
-var SLACK_API string = "https://dev.slack.com/api/"
+var SLACK_API string = "https://slack.com/api/"
 var SLACK_WEB_API_FORMAT string = "https://%s.slack.com/api/users.admin.%s?t=%s"
 
 // HTTPClient sets a custom http.Client
